@@ -15,6 +15,7 @@ function base64urlEncode(str) {
 
 // Utility function to create a HMAC SHA-256 signature
 async function createSignature(header, payload, secret) {
+	
 	const enc = new TextEncoder();
 	const key = await crypto.subtle.importKey(
 	  'raw',
@@ -30,10 +31,26 @@ async function createSignature(header, payload, secret) {
 
 // Function to create a JWT
 async function createJWT(payload, secret) {
+
 	const header = base64urlEncode({ alg: 'HS256', typ: 'JWT' });
 	const encodedPayload = base64urlEncode(payload);
 	const signature = await createSignature(header, encodedPayload, secret);
 	return `${header}.${encodedPayload}.${signature}`;
+}
+
+// Function to verify a JWT
+async function verifyJWT(token, secret) {
+	
+	const [header, payload, signature] = token.split('.');
+	const validSignature = await createSignature(header, payload, secret);
+	if (signature !== validSignature) {
+		throw new Error('Invalid token');
+	}
+	const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+	if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
+		throw new Error('Token expired');
+	}
+	return decodedPayload;
 }
 
 export default {
@@ -66,7 +83,7 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid username or password' }), { status: 401 });
         }
 
-		const payload = { USERNAME: username, USER_ID: user.id };
+		const payload = { USERNAME: username, USER_ID: user.id, exp: Math.floor(Date.now() / 1000) + 3600};//1hour
         const token = await createJWT(payload, JWT_SECRET);
 
         return new Response(JSON.stringify({ token }), {
