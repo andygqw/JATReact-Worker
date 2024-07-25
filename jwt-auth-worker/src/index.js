@@ -29,10 +29,10 @@ async function createSignature(header, payload, secret) {
 }
 
 // Function to create a JWT
-function createJWT(payload, secret) {
+async function createJWT(payload, secret) {
 	const header = base64urlEncode({ alg: 'HS256', typ: 'JWT' });
 	const encodedPayload = base64urlEncode(payload);
-	const signature = createSignature(header, encodedPayload, secret);
+	const signature = await createSignature(header, encodedPayload, secret);
 	return `${header}.${encodedPayload}.${signature}`;
 }
 
@@ -67,7 +67,7 @@ export default {
         }
 
 		const payload = { USERNAME: username, USER_ID: user.id };
-        const token = createJWT(payload, JWT_SECRET);
+        const token = await createJWT(payload, JWT_SECRET);
 
         return new Response(JSON.stringify({ token }), {
           headers: { 'Content-Type': 'application/json' },
