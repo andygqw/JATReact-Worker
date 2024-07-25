@@ -121,17 +121,12 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
-        try {
+		// Fetch data from the database
+		const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
 
-          // Fetch data from the database
-          const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
-
-          return new Response(JSON.stringify(data), {
-            headers: { 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          return new Response(JSON.stringify({ error: 'Invalid token' }), { status: 401 });
-        }
+		return new Response(JSON.stringify(data), {
+			headers: { 'Content-Type': 'application/json' },
+		});
       } 
       else {
         return new Response('Not Found', { status: 404 });
