@@ -1,0 +1,9 @@
+name = "jwt-auth-worker"
+main = "src/index.js"
+compatibility_date = "2024-07-25"
+node_compat=true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "jobapplications"
+database_id = "b934078c-4701-4273-88e2-fb8bb37f0ebb"
