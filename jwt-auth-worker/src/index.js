@@ -47,8 +47,6 @@ export default {
       const parsedUrl = new URL(request.url);
       const pathname = parsedUrl.pathname;
 
-	  var jwt = require('jsonwebtoken');
-
       if (method === 'POST' && pathname === "/login") {
 
         // Parse the JSON body from the request
@@ -70,8 +68,6 @@ export default {
 
 		const payload = { USERNAME: username, USER_ID: user.id };
         const token = createJWT(payload, JWT_SECRET);
-
-		console.log("Got token: " + token);
 
         return new Response(JSON.stringify({ token }), {
           headers: { 'Content-Type': 'application/json' },
