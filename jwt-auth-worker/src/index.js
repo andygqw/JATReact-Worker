@@ -7,15 +7,26 @@ const USER_ID = 'user_id';
 const PASSWORD = 'password';
 
 function base64urlEncode(str) {
-	return btoa(str)
-	  .replace(/=/g, '')
-	  .replace(/\+/g, '-')
-	  .replace(/\//g, '_');
+	// return btoa(str)
+	//   .replace(/=/g, '')
+	//   .replace(/\+/g, '-')
+	//   .replace(/\//g, '_');
+	return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+}
+
+function base64urlDecode(str) {
+
+	return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 }
 
 // Utility function to create a HMAC SHA-256 signature
 async function createSignature(header, payload, secret) {
-	
+
 	const enc = new TextEncoder();
 	const key = await crypto.subtle.importKey(
 	  'raw',
@@ -32,8 +43,8 @@ async function createSignature(header, payload, secret) {
 // Function to create a JWT
 async function createJWT(payload, secret) {
 
-	const header = base64urlEncode({ alg: 'HS256', typ: 'JWT' });
-	const encodedPayload = base64urlEncode(payload);
+	const header = base64urlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+	const encodedPayload = base64urlEncode(JSON.stringify(payload));
 	const signature = await createSignature(header, encodedPayload, secret);
 	return `${header}.${encodedPayload}.${signature}`;
 }
@@ -46,7 +57,8 @@ async function verifyJWT(token, secret) {
 	if (signature !== validSignature) {
 		throw new Error('Invalid token');
 	}
-	const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+	const decodedPayload = JSON.parse(base64urlDecode(payload));
+	console.log("Decoded payload: " + decodedPayload);
 	if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
 		throw new Error('Token expired');
 	}
@@ -91,6 +103,7 @@ export default {
         });
       } 
       else if (method === 'GET' && pathname === "/applications") {
+
         // Parse token
         const authHeader = request.headers.get('Authorization');
         if (!authHeader) {
@@ -98,17 +111,20 @@ export default {
         }
         const token = authHeader.split(' ')[1];
 
+
+		var payload = await verifyJWT(token, JWT_SECRET);
+
         // Parse param
-        const { user_id } = await request.json();
+        const user_id = payload.USER_ID;
 
         if (!user_id) {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
         try {
-          const decoded = jwt.verify(token, JWT_SECRET);
+
           // Fetch data from the database
-          const data = await db.prepare('SELECT * FROM ? WHERE ? = ?').bind(DATABASE_JOBS, USER_ID, decoded.user_id).all();
+          const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
 
           return new Response(JSON.stringify(data), {
             headers: { 'Content-Type': 'application/json' },
