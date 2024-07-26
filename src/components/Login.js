@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import axios from '../utils/api';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
-        
+
         e.preventDefault();
         try {
 
             const response = await axios.post('/login', { username, password });
             localStorage.setItem('token', response.data.token);
-            history.push('/dashboard');
+            navigate.push('/dashboard');
         } 
         catch (error) {
 
