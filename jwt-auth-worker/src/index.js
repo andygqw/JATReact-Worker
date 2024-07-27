@@ -65,6 +65,28 @@ async function verifyJWT(token, secret) {
 	return decodedPayload;
 }
 
+// async function parseUserIdFromHeader(authHeader){
+
+//   const token = authHeader.split(' ')[1];
+
+//   var payload = await verifyJWT(token, JWT_SECRET);
+
+//   // Parse param
+//   return payload.USER_ID;
+// }
+
+// Data Manipulation
+function validString(str){
+
+  if (str === null || str === undefined || str.trim() === "") {
+
+    return null;
+  }
+  else {
+    return str;
+  }
+}
+
 
 //CORS settings
 function handleOptions(request) {
@@ -84,7 +106,6 @@ function addCorsHeaders(response) {
 }
 
 
-
 export default {
   async fetch(request, env, ctx) {
 
@@ -102,6 +123,7 @@ export default {
       const parsedUrl = new URL(request.url);
       const pathname = parsedUrl.pathname;
 
+      // ENDPOINT: LOG IN 
       if (method === 'POST' && pathname === "/login") {
 
         // Parse the JSON body from the request
@@ -128,6 +150,7 @@ export default {
           headers: { 'Content-Type': 'application/json' },
         }));
       } 
+      //ENDPOINT: APPLICATIONS
       else if (method === 'GET' && pathname === "/applications") {
 
         // Parse token
@@ -135,10 +158,10 @@ export default {
         if (!authHeader) {
           return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
         }
+
         const token = authHeader.split(' ')[1];
 
-
-		    var payload = await verifyJWT(token, JWT_SECRET);
+        var payload = await verifyJWT(token, JWT_SECRET);
 
         // Parse param
         const user_id = payload.USER_ID;
@@ -147,13 +170,106 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
+        const query = 'SELECT * FROM job_applications WHERE user_id = ? ORDER BY application_date DESC, id DESC';
+
         // Fetch data from the database
-        const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
+        const data = await db.prepare(query).bind(user_id).all();
 
         return addCorsHeaders(new Response(JSON.stringify(data), {
           headers: { 'Content-Type': 'application/json' },
         }));
       } 
+      //ENDPOINT: ADD APPLICATION
+      else if (method === 'POST' && pathname === "/applications/add") {
+
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) {
+          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        var payload = await verifyJWT(token, JWT_SECRET);
+
+        // Parse param
+        const user_id = payload.USER_ID;
+
+        if (!user_id) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const body = await request.json();
+
+        const job_title = validString(body.job_title);
+        const company_name = validString(body.company_name);
+        const job_description = validString(body.job_description);
+        const job_location = validString(body.job_location);
+        const job_url = validString(body.job_url);
+        const application_deadline_date = validString(body.application_deadline_date);
+        const application_date = validString(body.application_date);
+        const resume_version = validString(body.resume_version);
+        const status = validString(body.status);
+        const notes = validString(body.notes);
+        const is_marked = body.is_marked ? 1 : 0;
+
+
+        if (!user_id || !job_title || !company_name || !status || !is_marked) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const query = 'INSERT INTO job_applications (user_id, job_title, company_name, ' +
+        'job_description, job_location, job_url, application_deadline_date, application_date, ' +
+        'resume_version, status, notes, is_marked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
+        const info = await db.prepare(query).bind(user_id, job_title, company_name, job_description, 
+        job_location, job_url, application_deadline_date, application_date, resume_version,
+        status, notes, is_marked).run();
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      //ENDPOINT: DELETE APPLICATION
+      else if (method === 'POST' && pathname === "/applications/delete") {
+
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) {
+          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        var payload = await verifyJWT(token, JWT_SECRET);
+
+        // Parse param
+        const user_id = payload.USER_ID;
+
+        if (!user_id) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const body = await request.json();
+
+        const ids = body.application_id;
+
+        if (!ids) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        var count = 0;
+        for (let id of ids) {
+
+          const query = 'DELETE FROM job_applications WHERE id = ?';
+          const info = await db.prepare(query).bind(id).run();
+          if(info.success) count++;
+        }
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: count}), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+
+      //ENDPOINT: FALL THROUGH DEFAULT NOT FOUND
       else {
         return new Response('Not Found', { status: 404 });
       }
