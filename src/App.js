@@ -10,11 +10,11 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/login" component={Login} />
-          {/* <Route path="/register" component={Register} /> */}
-          <Route path="/dashboard" component={Dashboard} />
-          {/* <Route path="/user-detail" component={UserDetail} /> */}
-          <Route path="/" component={Login} />
+          <Route path="/login" element={<Login />} />
+          {/* <Route path="/register" element={<Register />} /> */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* <Route path="/user-detail" element={<UserDetail />} /> */}
+          <Route path="/" element={<Login />} />
         </Routes>
       </div>
     </Router>

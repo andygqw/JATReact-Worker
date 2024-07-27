@@ -65,8 +65,34 @@ async function verifyJWT(token, secret) {
 	return decodedPayload;
 }
 
+
+//CORS settings
+function handleOptions(request) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+  return new Response(null, { headers });
+}
+
+function addCorsHeaders(response) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
+}
+
+
+
 export default {
   async fetch(request, env, ctx) {
+
+    if (request.method === 'OPTIONS') {
+      return handleOptions(request);
+    }
+    
+
     try {
       const db = env.DB;
       const JWT_SECRET = env.JWT_SECRET;
@@ -81,7 +107,7 @@ export default {
         // Parse the JSON body from the request
         const body = await request.json();
 
-		const username = body.username;
+		    const username = body.username;
         const password = body.password;
 
         if (!username || !password) {
@@ -95,12 +121,12 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid username or password' }), { status: 401 });
         }
 
-		const payload = { USERNAME: username, USER_ID: user.id, exp: Math.floor(Date.now() / 1000) + 3600};//1hour
+		    const payload = { USERNAME: username, USER_ID: user.id, exp: Math.floor(Date.now() / 1000) + 3600};//1hour
         const token = await createJWT(payload, JWT_SECRET);
 
-        return new Response(JSON.stringify({ token }), {
+        return addCorsHeaders(new Response(JSON.stringify({ token }), {
           headers: { 'Content-Type': 'application/json' },
-        });
+        }));
       } 
       else if (method === 'GET' && pathname === "/applications") {
 
@@ -112,7 +138,7 @@ export default {
         const token = authHeader.split(' ')[1];
 
 
-		var payload = await verifyJWT(token, JWT_SECRET);
+		    var payload = await verifyJWT(token, JWT_SECRET);
 
         // Parse param
         const user_id = payload.USER_ID;
@@ -121,19 +147,19 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
-		// Fetch data from the database
-		const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
+        // Fetch data from the database
+        const data = await db.prepare('SELECT * FROM job_applications WHERE user_id = ?').bind(user_id).all();
 
-		return new Response(JSON.stringify(data), {
-			headers: { 'Content-Type': 'application/json' },
-		});
+        return addCorsHeaders(new Response(JSON.stringify(data), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
       } 
       else {
         return new Response('Not Found', { status: 404 });
       }
     } 
     catch (e) {
-      return new Response("Internal Error: " + e, { status: 500 });
+      return addCorsHeaders(new Response('Internal Error: ' + e, { status: 500 }));
     }
   }
 };

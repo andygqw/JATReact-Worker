@@ -13,7 +13,10 @@ function Login() {
         e.preventDefault();
         try {
 
-            const response = await axios.post('/login', { username, password });
+            const response = await axios.post('/login', {
+                username: username,
+                password: password
+            });
             localStorage.setItem('token', response.data.token);
             navigate.push('/dashboard');
         } 
