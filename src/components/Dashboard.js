@@ -14,7 +14,7 @@ function Dashboard() {
                 setApplications(response.data.results);
             } 
             catch (error) {
-                console.error('Fetching applications failed:', error);
+                alert('Fetching applications failed:', error);
             }
         };
 
@@ -27,7 +27,7 @@ function Dashboard() {
             <h2>Dashboard</h2>
             <ul>
                 {applications.map((app) => (
-                    <li key={app.id}>{app.jobTitle}</li>
+                    <li key={app.id}>{app.job_title}</li>
                 ))}
             </ul>
         </div>
