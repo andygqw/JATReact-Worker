@@ -11,7 +11,7 @@ function Dashboard() {
             try {
 
                 const response = await axios.get('/applications');
-                setApplications(response.data);
+                setApplications(response.data.results);
             } 
             catch (error) {
                 console.error('Fetching applications failed:', error);
