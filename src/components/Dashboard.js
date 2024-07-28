@@ -208,6 +208,7 @@ function Dashboard() {
                 columns={columns}
                 pageSize={5}
                 rowsPerPageOptions={[5]}
+                autoHeight
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
             />

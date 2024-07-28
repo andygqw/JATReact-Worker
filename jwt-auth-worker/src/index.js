@@ -372,11 +372,11 @@ export default {
         const query = 'UPDATE job_applications SET job_title = ?, company_name = ?,' +
         'job_description = ?, job_location = ?, job_url = ?, application_deadline_date = ?,' +
         'application_date = ?, resume_version = ?, status = ?, notes = ?, is_marked = ?' +
-        'WHERE id = ?';
+        'WHERE id = ? and user_id = ?';
 
         const info = await db.prepare(query).bind(job_title, company_name, job_description, 
         job_location, job_url, application_deadline_date, application_date, resume_version,
-        status, notes, is_marked, body.id).run();
+        status, notes, is_marked, body.id, user_id).run();
 
         return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },
@@ -412,8 +412,8 @@ export default {
         var count = 0;
         for (let id of ids) {
 
-          const query = 'DELETE FROM job_applications WHERE id = ?';
-          const info = await db.prepare(query).bind(id).run();
+          const query = 'DELETE FROM job_applications WHERE id = ? and user_id = ?';
+          const info = await db.prepare(query).bind(id, user_id).run();
           if(info.success) count++;
         }
 
