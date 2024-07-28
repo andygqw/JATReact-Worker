@@ -89,7 +89,6 @@ function Dashboard() {
     const handleAddOpen = () => {
 
         setCurrentApplication({
-            id: 0,
             user_id: '',
             job_title: '',
             company_name: '',
@@ -141,8 +140,16 @@ function Dashboard() {
                 if (response.status === 200){
 
                     const newApplication = { ...currentApplication, id: response.data.id };
-                    console.log('new App: ' + JSON.stringify(newApplication));
-                    setApplications((prevApplications) => [...prevApplications, newApplication]);
+                    setApplications((prevApplications) => [newApplication, ...prevApplications]);
+                    // To add at the end, use:
+                    // setApplications((prevApplications) => [...prevApplications, newApplication]);
+                    // To insert at a specific index (e.g., index 1), use:
+                    // const index = 1;
+                    // setApplications((prevApplications) => [
+                    //   ...prevApplications.slice(0, index),
+                    //   newApplication,
+                    //   ...prevApplications.slice(index),
+                    // ]);
                 }
                 else{
 
