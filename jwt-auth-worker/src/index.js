@@ -1,3 +1,4 @@
+import { parseHTML } from 'linkedom';
 import bcrypt from 'bcryptjs';
 
 const DATABASE_USER = 'users';
@@ -58,7 +59,6 @@ async function verifyJWT(token, secret) {
 		throw new Error('Invalid token');
 	}
 	const decodedPayload = JSON.parse(base64urlDecode(payload));
-	console.log("Decoded payload: " + decodedPayload);
 	if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
 		throw new Error('Token expired');
 	}
@@ -87,6 +87,14 @@ function validString(str){
   }
 }
 
+function getFormattedDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed, so we add 1
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
 
 //CORS settings
 function handleOptions(request) {
@@ -224,6 +232,106 @@ export default {
         const info = await db.prepare(query).bind(user_id, job_title, company_name, job_description, 
         job_location, job_url, application_deadline_date, application_date, resume_version,
         status, notes, is_marked).run();
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      //ENDPOINT: QUICK ADD
+      else if (method === 'POST' && pathname === "/applications/quickadd") {  
+        
+        const authHeader = request.headers.get('Authorization');
+
+        if (!authHeader) {
+          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        var payload = await verifyJWT(token, JWT_SECRET);
+
+        // Parse param
+        const user_id = payload.USER_ID;
+        const body = await request.json();
+
+        const url = body.url;
+
+        if (!user_id || !url || !url.includes("linkedin.com")) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+        
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0'
+          }
+        });
+
+        //Get the config
+        var query = 'SELECT quickAddResumeVersion FROM config WHERE user_id = ?';
+        const config = await db.prepare(query).bind(user_id).first();
+
+        if(response.status === 429){
+
+          return new Response(JSON.stringify({ error: 'Too many requests to ' + url }), { status: 429 });
+        }
+        else if (!response.ok) {
+
+          return new Response(JSON.stringify({ error: 'Request failed on ' + url }), { status: 400 });
+        }
+
+        const text = await response.text();
+        const { document } = parseHTML(text);
+
+        const titleClass = "top-card-layout__title font-sans text-lg papabear:text-xl font-bold leading-open text-color-text mb-0 topcard__title";
+        const companyNameClass = "topcard__org-name-link topcard__flavor--black-link";
+        const companyLocClass = "topcard__flavor topcard__flavor--bullet";
+
+        // Extract title
+        let title = "";
+        const titleTag = document.querySelectorAll(`h1`);
+        titleTag.forEach(tag => {
+          if (tag.className.includes(titleClass)) {
+            title = tag.textContent;
+          }
+        });
+
+        // Extract company name
+        let companyName = "";
+        const companyNameTags = document.querySelectorAll(`a`);
+        companyNameTags.forEach(tag => {
+          if (tag.className.includes(companyNameClass)) {
+            companyName = tag.textContent.trim();
+          }
+        });
+
+        // Extract location
+        let location = "";
+        const locationTags = document.querySelectorAll(`span`);
+        locationTags.forEach(tag => {
+          if (tag.className.includes(companyLocClass)) {
+            location = tag.textContent.trim();
+          }
+        });
+
+        console.log('Title:', title);
+        console.log('Company Name:', companyName);
+        console.log('Location:', location);
+
+        const job_title = validString(title);
+        const company_name = validString(companyName);
+        const job_location = validString(location);
+        const job_url = validString(url);
+        const application_date = validString(getFormattedDate());
+        const resume_version = validString(config.quickAddResumeVersion);
+        const status = "Applied";
+        const is_marked = 0;
+
+        query = 'INSERT INTO job_applications (user_id, job_title, company_name, ' +
+        'job_location, job_url, application_date, resume_version, status, is_marked)' +
+        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
+        const info = await db.prepare(query).bind(user_id, job_title, company_name,
+        job_location, job_url, application_date, resume_version, status, is_marked).run();
 
         return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },
