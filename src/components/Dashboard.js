@@ -29,6 +29,9 @@ function Dashboard() {
     const [error, setError] = useState(null);
     const [validationError, setValidationError] = useState('');
 
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [applicationToDelete, setApplicationToDelete] = useState(null); 
+
 
     useEffect(() => {
 
@@ -164,15 +167,29 @@ function Dashboard() {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDeleteOpen = (id) => {
+
+        setApplicationToDelete(id);
+        setDeleteOpen(true);
+    };
+    
+    const handleDeleteClose = () => {
+
+        setDeleteOpen(false);
+        setApplicationToDelete(null);
+    };
+    
+    const handleDeleteConfirm = async () => {
         try {
 
-          await axios.post(`/applications/delete`, { application_id: [id] });
-          setApplications((prevApplications) => prevApplications.filter((app) => app.id !== id));
+            await axios.post('/applications/delete', { application_id : [applicationToDelete]});
+            setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
+            handleDeleteClose();
         }
         catch (error) {
 
-          setError('Failed to delete job application.');
+            setError('Failed to delete job application.');
+            handleDeleteClose();
         }
     };
 
@@ -219,7 +236,7 @@ function Dashboard() {
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDelete(params.row.id);
+                    handleDeleteOpen(params.row.id);
                   }}
                   variant="contained"
                   color="secondary"
@@ -254,6 +271,20 @@ function Dashboard() {
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
             />
+            <Dialog open={deleteOpen} onClose={handleDeleteClose}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete this application?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteClose} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="primary">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{isEditMode ? 'Edit Job Application' : 'Add Job Application'}</DialogTitle>
                 <DialogContent>
