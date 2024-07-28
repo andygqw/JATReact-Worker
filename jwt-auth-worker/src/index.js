@@ -193,10 +193,6 @@ export default {
         // Parse param
         const user_id = payload.USER_ID;
 
-        if (!user_id) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
-        }
-
         const body = await request.json();
 
         const job_title = validString(body.job_title);
@@ -211,8 +207,7 @@ export default {
         const notes = validString(body.notes);
         const is_marked = body.is_marked ? 1 : 0;
 
-
-        if (!user_id || !job_title || !company_name || !status || !is_marked) {
+        if (!user_id || !job_title || !company_name || !status || !Number.isInteger(is_marked)) {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
@@ -358,7 +353,9 @@ export default {
         const notes = validString(body.notes);
         const is_marked = body.is_marked ? 1 : 0;
 
-        if (!user_id || !job_title || !company_name || !status || !is_marked) {
+        if (!Number.isInteger(body.id)|| job_title === null ||
+            company_name === null || status === null || !Number.isInteger(is_marked)) {
+
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
