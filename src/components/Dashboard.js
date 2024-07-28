@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid,
+    GridToolbarContainer,
+    GridToolbarExport,
+    GridToolbarDensitySelector } from '@mui/x-data-grid';
 import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Alert, Button, Dialog, 
@@ -274,7 +277,26 @@ function Dashboard() {
             ),
         },
     ];
-    
+
+    // DATA-GRID TOOLBAR
+    function CustomToolbar() {
+        return (
+          <GridToolbarContainer>
+            <GridToolbarDensitySelector
+              slotProps={{ tooltip: { title: 'Change density' } }}
+            />
+            <Box sx={{ flexGrow: 1 }} />
+            <GridToolbarExport
+                printOptions={{ disableToolbarButton: true }}
+                slotProps={{
+                    tooltip: { title: 'Export data' },
+                    button: { variant: 'outlined' }
+                }}
+            />
+          </GridToolbarContainer>
+        );
+    }
+      
     return (
         <Box sx={{ height: '100vh', width: '100%' }}>
             <Typography variant="h4" gutterBottom>
@@ -297,10 +319,12 @@ function Dashboard() {
                 autoHeight
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
-                loading={loading} 
+                loading={loading}
                 slots={{
-                    toolbar: GridToolbar,
+                    toolbar: CustomToolbar,
                 }}
+                hideFooterRowCount={true}
+                hideFooterSelectedRowCount={true}
             />
             <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>
