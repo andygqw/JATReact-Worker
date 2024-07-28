@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Alert, Button, Dialog, 
@@ -212,6 +212,7 @@ function Dashboard() {
             sortable: false,
             filterable: false,
             editable: false,
+            disableColumnMenu: true,
             renderCell: (params) => (
               params.value ? <a href={params.value} target="_blank" 
                                 rel="noopener noreferrer" 
@@ -241,6 +242,7 @@ function Dashboard() {
             sortable: false,
             filterable: false,
             editable: false,
+            disableColumnMenu: true,
             renderCell: (params) => (
               <>
                 <Button
@@ -280,6 +282,7 @@ function Dashboard() {
                 autoHeight
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
+                components={{ Toolbar: GridToolbar }}
             />
             <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>
