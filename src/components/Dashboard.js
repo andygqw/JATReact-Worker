@@ -32,11 +32,14 @@ function Dashboard() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [applicationToDelete, setApplicationToDelete] = useState(null); 
 
+    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
 
         const fetchApplications = async () => {
 
+            setLoading(true);
             try {
 
                 const response = await axios.get('/applications');
@@ -76,6 +79,9 @@ function Dashboard() {
                 
                     setError('An error occurred while setting up the request.');
                 }
+            }finally{
+
+                setLoading(false);
             }
         };
 
@@ -129,6 +135,8 @@ function Dashboard() {
         }
 
         try {
+
+            setLoading(true);
             if (isEditMode) {
                 await axios.post(`/applications/edit`, currentApplication);
                 setApplications((prevApplications) =>
@@ -164,6 +172,9 @@ function Dashboard() {
         catch (error) {
 
             setError(error.response?.data?.message);
+        }finally{
+
+            setLoading(false);
         }
     };
 
@@ -182,6 +193,7 @@ function Dashboard() {
     const handleDeleteConfirm = async () => {
         try {
 
+            setLoading(true);
             await axios.post('/applications/delete', { application_id : [applicationToDelete]});
             setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
             handleDeleteClose();
@@ -190,6 +202,9 @@ function Dashboard() {
 
             setError('Failed to delete job application.');
             handleDeleteClose();
+        }finally{
+
+            setLoading(false);
         }
     };
 
@@ -282,7 +297,10 @@ function Dashboard() {
                 autoHeight
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
-                components={{ Toolbar: GridToolbar }}
+                loading={loading} 
+                slots={{
+                    toolbar: GridToolbar,
+                }}
             />
             <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>
