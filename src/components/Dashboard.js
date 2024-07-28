@@ -7,6 +7,10 @@ import { Box, Typography, Alert, Button, Dialog,
     TextField, Select, MenuItem, FormControl, 
     InputLabel, Checkbox, FormControlLabel  } from '@mui/material';
 
+
+
+const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
+
 function getFormattedDate() {
     const date = new Date();
     const year = date.getFullYear();
@@ -18,11 +22,12 @@ function getFormattedDate() {
 function Dashboard() {
 
     const [applications, setApplications] = useState([]);
-    const [error, setError] = useState(null);
     const [open, setOpen] = useState(false);
     const [currentApplication, setCurrentApplication] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const navigate = useNavigate();
+    const [error, setError] = useState(null);
+    const [validationError, setValidationError] = useState('');
 
 
     useEffect(() => {
@@ -84,6 +89,7 @@ function Dashboard() {
     const handleAddOpen = () => {
 
         setCurrentApplication({
+            id: 0,
             user_id: '',
             job_title: '',
             company_name: '',
@@ -93,7 +99,7 @@ function Dashboard() {
             application_deadline_date: '',
             application_date: getFormattedDate(),
             resume_version: '',
-            status: '',
+            status: STATUS_OPTIONS[0],
             notes: '',
             is_marked: false,
         });
@@ -114,6 +120,12 @@ function Dashboard() {
     };
     
     const handleSubmit = async () => {
+
+        if (!currentApplication.job_title || !currentApplication.company_name || !currentApplication.status) {
+            setValidationError('Job Title, Company Name, and Status are required.');
+            return;
+        }
+
         try {
             if (isEditMode) {
                 await axios.post(`/applications/edit`, currentApplication);
@@ -128,8 +140,11 @@ function Dashboard() {
                 const response = await axios.post('/applications/add', currentApplication);
                 if (response.status === 200){
 
-                    setApplications((prevApplications) => [...prevApplications, currentApplication]);
-                }else{
+                    const newApplication = { ...currentApplication, id: response.data.id };
+                    console.log('new App: ' + JSON.stringify(newApplication));
+                    setApplications((prevApplications) => [...prevApplications, newApplication]);
+                }
+                else{
 
                     throw new Error('Failed to save job application.');
                 }
@@ -149,11 +164,13 @@ function Dashboard() {
         { field: 'job_location', headerName: 'Location', flex: 0.2 },
         { field: 'status', headerName: 'Status', flex: 0.1 },
         { field: 'application_date', headerName: 'Applied Date', flex: 0.1 },
-        { field: 'job_url', headerName: 'Job Link', flex: 0.1, 
-            renderCell: (params) => 
-            <a href={params.value} target="_blank" rel="noopener noreferrer">
-                Click here
-            </a>
+        {
+            field: 'job_url',
+            headerName: 'Job Link',
+            flex: 0.1,
+            renderCell: (params) => (
+              params.value ? <a href={params.value} target="_blank" rel="noopener noreferrer">Click here</a> : ''
+            ),
         },
         {
             field: 'edit',
@@ -173,7 +190,7 @@ function Dashboard() {
     ];
     
     return (
-        <Box sx={{ height: '60%', width: '100%' }}>
+        <Box sx={{ height: '100vh', width: '100%' }}>
             <Typography variant="h4" gutterBottom>
             Dashboard
             </Typography>
@@ -196,6 +213,7 @@ function Dashboard() {
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{isEditMode ? 'Edit Job Application' : 'Add Job Application'}</DialogTitle>
                 <DialogContent>
+                {validationError && <Alert severity="error">{validationError}</Alert>}
                 <TextField
                     label="Job Title"
                     name="job_title"
@@ -203,6 +221,7 @@ function Dashboard() {
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
+                    required
                 />
                 <TextField
                     label="Company Name"
@@ -211,6 +230,7 @@ function Dashboard() {
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
+                    required
                 />
                 <TextField
                     label="Job Location"
@@ -247,6 +267,7 @@ function Dashboard() {
                     fullWidth
                     margin="normal"
                     InputLabelProps={{ shrink: true }}
+                    required
                 />
                 <TextField
                     label="Application Deadline Date"
@@ -272,8 +293,9 @@ function Dashboard() {
                         name="status"
                         value={currentApplication?.status || ''}
                         onChange={handleChange}
+                        required
                         >
-                        {['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'].map((status) => (
+                        {STATUS_OPTIONS.map((status) => (
                             <MenuItem key={status} value={status}>
                             {status}
                             </MenuItem>

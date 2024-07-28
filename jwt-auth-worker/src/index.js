@@ -215,11 +215,16 @@ export default {
         'job_description, job_location, job_url, application_deadline_date, application_date, ' +
         'resume_version, status, notes, is_marked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-        const info = await db.prepare(query).bind(user_id, job_title, company_name, job_description, 
-        job_location, job_url, application_deadline_date, application_date, resume_version,
-        status, notes, is_marked).run();
+        const sql = 'SELECT last_insert_rowid() as id';
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+        const rows = await db.batch([
+          db.prepare(query).bind(user_id, job_title, company_name, job_description, 
+            job_location, job_url, application_deadline_date, application_date, resume_version,
+            status, notes, is_marked),
+          db.prepare(sql),
+        ]);
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, id: rows[1].results[0].id  }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
@@ -313,10 +318,15 @@ export default {
         'job_location, job_url, application_date, resume_version, status, is_marked)' +
         ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-        const info = await db.prepare(query).bind(user_id, job_title, company_name,
-        job_location, job_url, application_date, resume_version, status, is_marked).run();
+        const sql = 'SELECT last_insert_rowid() as id';
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+        const rows = await db.batch([
+          db.prepare(query).bind(user_id, job_title, company_name,
+            job_location, job_url, application_date, resume_version, status, is_marked),
+          db.prepare(sql),
+        ]);
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, id: rows[1].results[0].id  }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
