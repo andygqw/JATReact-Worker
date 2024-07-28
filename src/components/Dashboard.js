@@ -7,12 +7,12 @@ function Dashboard() {
 
     const [applications, setApplications] = useState([]);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
 
         const fetchApplications = async () => {
-
-            const navigate = useNavigate();
 
             try {
 
@@ -56,7 +56,7 @@ function Dashboard() {
         };
 
         fetchApplications();
-    }, []);
+    }, [navigate]);
 
     return (
 
