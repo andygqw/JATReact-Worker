@@ -164,10 +164,22 @@ function Dashboard() {
         }
     };
 
+    const handleDelete = async (id) => {
+        try {
+
+          await axios.post(`/applications/delete`, { application_id: [id] });
+          setApplications((prevApplications) => prevApplications.filter((app) => app.id !== id));
+        }
+        catch (error) {
+
+          setError('Failed to delete job application.');
+        }
+    };
+
     const columns = [
 
-        { field: 'job_title', headerName: 'Job Title', flex: 0.3},
-        { field: 'company_name', headerName: 'Company', flex: 0.1 },
+        { field: 'job_title', headerName: 'Job Title', flex: 0.2},
+        { field: 'company_name', headerName: 'Company', flex: 0.2 },
         { field: 'job_location', headerName: 'Location', flex: 0.2 },
         { field: 'status', headerName: 'Status', flex: 0.1 },
         { field: 'application_date', headerName: 'Applied Date', flex: 0.1 },
@@ -176,24 +188,47 @@ function Dashboard() {
             headerName: 'Job Link',
             flex: 0.1,
             renderCell: (params) => (
-              params.value ? <a href={params.value} target="_blank" rel="noopener noreferrer">Click here</a> : ''
+              params.value ? <a href={params.value} target="_blank" 
+                                rel="noopener noreferrer" 
+                                onClick={(e) => e.stopPropagation()}>Click here</a> : ''
             ),
         },
+        // {
+        //     field: 'edit',
+        //     headerName: 'Edit',
+        //     sortable: false,
+        //     renderCell: (params) => (
+        //         <Button
+        //             onClick={() => handleOpen(params.row)}
+        //             variant="contained"
+        //             color="primary"
+        //         >
+        //         Edit
+        //         </Button>
+        //     ),
+            
+        //     flex: 0.1,
+        // },
         {
-            field: 'edit',
-            headerName: 'Edit',
+            field: 'actions',
+            headerName: 'Actions',
+            flex: 0.1,
             sortable: false,
             renderCell: (params) => (
+              <>
                 <Button
-                    onClick={() => handleOpen(params.row)}
-                    variant="contained"
-                    color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(params.row.id);
+                  }}
+                  variant="contained"
+                  color="secondary"
                 >
-                Edit
+                  Delete
                 </Button>
+              </>
             ),
-                flex: 0.1,
-            },
+        },
     ];
     
     return (
@@ -213,8 +248,8 @@ function Dashboard() {
             <DataGrid
                 rows={applications}
                 columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
+                pageSize={50}
+                rowsPerPageOptions={[50]}
                 autoHeight
                 disableSelectionOnClick
                 onRowClick={(params) => handleOpen(params.row)}
