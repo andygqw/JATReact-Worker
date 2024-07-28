@@ -2,8 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Box, Typography, Alert, Button, Dialog, 
+    DialogActions, DialogContent, DialogTitle, 
+    TextField, Select, MenuItem, FormControl, 
+    InputLabel, Checkbox, FormControlLabel  } from '@mui/material';
 
+function getFormattedDate() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 
 function Dashboard() {
 
@@ -81,7 +91,7 @@ function Dashboard() {
             job_location: '',
             job_url: '',
             application_deadline_date: '',
-            application_date: '',
+            application_date: getFormattedDate(),
             resume_version: '',
             status: '',
             notes: '',
@@ -106,7 +116,6 @@ function Dashboard() {
     const handleSubmit = async () => {
         try {
             if (isEditMode) {
-                console.log(JSON.stringify(currentApplication));
                 await axios.post(`/applications/edit`, currentApplication);
                 setApplications((prevApplications) =>
                     prevApplications.map((app) =>
@@ -204,20 +213,22 @@ function Dashboard() {
                     margin="normal"
                 />
                 <TextField
-                    label="Job Description"
-                    name="job_description"
-                    value={currentApplication?.job_description || ''}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
                     label="Job Location"
                     name="job_location"
                     value={currentApplication?.job_location || ''}
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
+                />
+                <TextField
+                    label="Job Description"
+                    name="job_description"
+                    value={currentApplication?.job_description || ''}
+                    onChange={handleChange}
+                    fullWidth
+                    margin="normal"
+                    multiline
+                    rows={4}
                 />
                 <TextField
                     label="Job URL"
@@ -228,20 +239,20 @@ function Dashboard() {
                     margin="normal"
                 />
                 <TextField
-                    label="Application Deadline Date"
-                    name="application_deadline_date"
+                    label="Application Date"
+                    name="application_date"
                     type="date"
-                    value={currentApplication?.application_deadline_date || ''}
+                    value={currentApplication?.application_date || ''}
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
                     InputLabelProps={{ shrink: true }}
                 />
                 <TextField
-                    label="Application Date"
-                    name="application_date"
+                    label="Application Deadline Date"
+                    name="application_deadline_date"
                     type="date"
-                    value={currentApplication?.application_date || ''}
+                    value={currentApplication?.application_deadline_date || ''}
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
@@ -255,14 +266,20 @@ function Dashboard() {
                     fullWidth
                     margin="normal"
                 />
-                <TextField
-                    label="Status"
-                    name="status"
-                    value={currentApplication?.status || ''}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                />
+                <FormControl fullWidth margin="normal">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                        name="status"
+                        value={currentApplication?.status || ''}
+                        onChange={handleChange}
+                        >
+                        {['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'].map((status) => (
+                            <MenuItem key={status} value={status}>
+                            {status}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
                 <TextField
                     label="Notes"
                     name="notes"
@@ -270,15 +287,18 @@ function Dashboard() {
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
+                    multiline
+                    rows={4}
                 />
-                <TextField
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        name="is_marked"
+                        checked={currentApplication?.is_marked || false}
+                        onChange={(e) => setCurrentApplication((prevApplication) => ({ ...prevApplication, is_marked: e.target.checked }))}
+                    />
+                    }
                     label="Is Marked"
-                    name="is_marked"
-                    type="checkbox"
-                    checked={currentApplication?.is_marked || false}
-                    onChange={(e) => setCurrentApplication((prevApplication) => ({ ...prevApplication, is_marked: e.target.checked }))}
-                    fullWidth
-                    margin="normal"
                 />
                 </DialogContent>
                 <DialogActions>
