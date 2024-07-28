@@ -209,6 +209,7 @@ function Dashboard() {
                 pageSize={5}
                 rowsPerPageOptions={[5]}
                 disableSelectionOnClick
+                onRowClick={(params) => handleOpen(params.row)}
             />
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{isEditMode ? 'Edit Job Application' : 'Add Job Application'}</DialogTitle>
