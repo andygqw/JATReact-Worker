@@ -87,15 +87,6 @@ function validString(str){
   }
 }
 
-function getFormattedDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed, so we add 1
-  const day = String(today.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
-
 //CORS settings
 function handleOptions(request) {
   const headers = {
@@ -254,9 +245,10 @@ export default {
         const user_id = payload.USER_ID;
         const body = await request.json();
 
-        const url = body.url;
+        const url = validString(body.url);
+        const date = validString(body.date);
 
-        if (!user_id || !url || !url.includes("linkedin.com")) {
+        if (!user_id || !date || !url || !url.includes("linkedin.com")) {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
         
@@ -317,7 +309,7 @@ export default {
         const company_name = validString(companyName);
         const job_location = validString(location);
         const job_url = validString(url);
-        const application_date = validString(getFormattedDate());
+        const application_date = validString(date);
         const resume_version = validString(config.quickAddResumeVersion);
         const status = "Applied";
         const is_marked = 0;

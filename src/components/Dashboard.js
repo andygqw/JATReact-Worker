@@ -62,12 +62,12 @@ function Dashboard() {
 
     const columns = [
 
-        { field: 'jobTitle', headerName: 'Job Title', width: 150 },
-        { field: 'company', headerName: 'Company', width: 150 },
-        { field: 'location', headerName: 'Location', width: 150 },
-        { field: 'status', headerName: 'Status', width: 110 },
-        { field: 'appliedDate', headerName: 'Applied Date', width: 160 },
-        { field: 'job_url', headerName: 'Job Link', width: 100, 
+        { field: 'job_title', headerName: 'Job Title', flex: 0.3},
+        { field: 'company_name', headerName: 'Company', flex: 0.1 },
+        { field: 'job_location', headerName: 'Location', flex: 0.2 },
+        { field: 'status', headerName: 'Status', flex: 0.1 },
+        { field: 'application_date', headerName: 'Applied Date', flex: 0.1 },
+        { field: 'job_url', headerName: 'Job Link', flex: 0.1, 
             renderCell: (params) => 
             <a href={params.value} target="_blank" rel="noopener noreferrer">
                 Click here
@@ -85,7 +85,7 @@ function Dashboard() {
               Edit
             </button>
           ),
-          width: 100,
+          flex: 0.1,
         },
     ];
     
