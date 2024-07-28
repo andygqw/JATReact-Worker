@@ -313,10 +313,6 @@ export default {
           }
         });
 
-        console.log('Title:', title);
-        console.log('Company Name:', companyName);
-        console.log('Location:', location);
-
         const job_title = validString(title);
         const company_name = validString(companyName);
         const job_location = validString(location);
@@ -332,6 +328,56 @@ export default {
 
         const info = await db.prepare(query).bind(user_id, job_title, company_name,
         job_location, job_url, application_date, resume_version, status, is_marked).run();
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      //ENDPOINT: EDIT APPLICATION
+      else if (method === 'POST' && pathname === "/applications/edit") {
+
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) {
+          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        var payload = await verifyJWT(token, JWT_SECRET);
+
+        // Parse param
+        const user_id = payload.USER_ID;
+
+        if (!user_id) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const body = await request.json();
+
+        const job_title = validString(body.job_title);
+        const company_name = validString(body.company_name);
+        const job_description = validString(body.job_description);
+        const job_location = validString(body.job_location);
+        const job_url = validString(body.job_url);
+        const application_deadline_date = validString(body.application_deadline_date);
+        const application_date = validString(body.application_date);
+        const resume_version = validString(body.resume_version);
+        const status = validString(body.status);
+        const notes = validString(body.notes);
+        const is_marked = body.is_marked ? 1 : 0;
+
+        if (!user_id || !job_title || !company_name || !status || !is_marked) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const query = 'UPDATE job_applications SET job_title = ?, company_name = ?,' +
+        'job_description = ?, job_location = ?, job_url = ?, application_deadline_date = ?,' +
+        'application_date = ?, resume_version = ?, status = ?, notes = ?, is_marked = ?' +
+        'WHERE id = ?';
+
+        const info = await db.prepare(query).bind(job_title, company_name, job_description, 
+        job_location, job_url, application_deadline_date, application_date, resume_version,
+        status, notes, is_marked, body.id).run();
 
         return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },
