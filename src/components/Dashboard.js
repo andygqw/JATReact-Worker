@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 function Dashboard() {
 
     const [applications, setApplications] = useState([]);
-    const [error, setError] = useState(null);
+    //const [error, setError] = useState(null);
     const navigate = useNavigate();
 
 
@@ -24,33 +24,33 @@ function Dashboard() {
                     
                     if (error.response.status === 401) {
 
-                      setError('Unauthorized access. Please log in.');
-                      navigate('/login');
+                        //setError('Unauthorized access. Please log in.');
+                        navigate('/login');
                     } 
                     else if (error.response.status === 403) {
 
-                      setError('Forbidden. You do not have permission to view this resource.');
+                        //setError('Forbidden. You do not have permission to view this resource.');
                     } 
                     else if (error.response.status === 404) {
 
-                      setError('Applications not found.');
+                        //setError('Applications not found.');
                     }
                     else if (error.response.status === 500) {
 
-                        setError(error.response);
+                        //setError(error.response);
                     } 
                     else {
 
-                      setError('An unexpected error occurred.');
+                        //setError('An unexpected error occurred.');
                     }
                 } 
                 else if (error.request) {
                 
-                    setError('No response from the server. Please try again later.');
+                    //setError('No response from the server. Please try again later.');
                 } 
                 else {
                 
-                    setError('An error occurred while setting up the request.');
+                    //setError('An error occurred while setting up the request.');
                 }
             }
         };
