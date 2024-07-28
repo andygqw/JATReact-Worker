@@ -195,15 +195,23 @@ function Dashboard() {
 
     const columns = [
 
-        { field: 'job_title', headerName: 'Job Title', flex: 0.2},
-        { field: 'company_name', headerName: 'Company', flex: 0.2 },
-        { field: 'job_location', headerName: 'Location', flex: 0.2 },
-        { field: 'status', headerName: 'Status', flex: 0.1 },
-        { field: 'application_date', headerName: 'Applied Date', flex: 0.1 },
+        { field: 'job_title', headerName: 'Job Title', flex: 0.2,
+            sortable: true, filterable: true, editable: false},
+        { field: 'company_name', headerName: 'Company', flex: 0.2,
+            sortable: true, filterable: true, editable: false},
+        { field: 'job_location', headerName: 'Location', flex: 0.2,
+            sortable: true, filterable: true, editable: false},
+        { field: 'status', headerName: 'Status', flex: 0.1,
+            sortable: true, filterable: true, editable: false},
+        { field: 'application_date', headerName: 'Applied Date', flex: 0.1,
+            sortable: true, filterable: true, editable: false},
         {
             field: 'job_url',
             headerName: 'Job Link',
             flex: 0.1,
+            sortable: false,
+            filterable: false,
+            editable: false,
             renderCell: (params) => (
               params.value ? <a href={params.value} target="_blank" 
                                 rel="noopener noreferrer" 
@@ -231,6 +239,8 @@ function Dashboard() {
             headerName: 'Actions',
             flex: 0.1,
             sortable: false,
+            filterable: false,
+            editable: false,
             renderCell: (params) => (
               <>
                 <Button
