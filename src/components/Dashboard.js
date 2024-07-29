@@ -270,7 +270,9 @@ function Dashboard() {
                     handleDeleteOpen(params.row.id);
                   }}
                   variant="contained"
-                  color="secondary"
+                  sx={{ backgroundColor: '#f44336',
+                        color: '#fff',
+                        '&:hover': { backgroundColor: '#d32f2f' } }}
                 >
                   Delete
                 </Button>
@@ -299,6 +301,7 @@ function Dashboard() {
     }
       
     return (
+        <Box sx={{ padding: 4 }}>
         <Box sx={{ height: '100vh', width: '100%' }}>
             <Typography variant="h4" gutterBottom>
             Dashboard
@@ -479,6 +482,7 @@ function Dashboard() {
                 </Button>
                 </DialogActions>
             </Dialog>
+        </Box>
         </Box>
     );
 }
