@@ -9,6 +9,7 @@ import { Box, Typography, Alert, Button, Dialog,
     DialogActions, DialogContent, DialogTitle, 
     TextField, Select, MenuItem, FormControl, 
     InputLabel, Checkbox, FormControlLabel  } from '@mui/material';
+import './Dashboard.css';
 
 
 
@@ -325,6 +326,22 @@ function Dashboard() {
                 }}
                 hideFooterRowCount={true}
                 hideFooterSelectedRowCount={true}
+
+                getRowClassName={(params) => {
+
+                    const job = params.row;
+                    if (job.status === 'Rejected' || job.status === 'Gave up') {
+                      return 'row-rejected';
+                    } else if (job.is_marked === 1) {
+                      return 'row-highlighted';
+                    } else if (job.status === 'Viewed') {
+                      return 'row-viewed';
+                    } else if (job.status === 'Saved') {
+                      return 'row-saved';
+                    } else {
+                      return '';
+                    }
+                }}
             />
             <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>

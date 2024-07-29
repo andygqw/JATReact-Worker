@@ -1,0 +1,15 @@
+.row-rejected {
+    background-color: #f9bec3;
+  }
+  
+  .row-highlighted {
+    background-color: #fff3cd;
+  }
+  
+  .row-viewed {
+    background-color: #d1ecf1;
+  }
+  
+  .row-saved {
+    background-color: #d4edda;
+  }
