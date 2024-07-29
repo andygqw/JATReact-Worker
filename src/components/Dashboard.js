@@ -214,13 +214,26 @@ function Dashboard() {
     const handleDeleteConfirm = async () => {
         try {
             setLoading(true);
-            await axios.post('/applications/delete', { application_id: [applicationToDelete] });
-            setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
-            handleDeleteClose();
+            const response = await axios.post('/applications/delete', { application_id: [applicationToDelete] },
+                {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
+                    }
+                }
+            );
+            if (response.status === 200){
+
+                setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
+            }
+            else {
+
+                throw new Error(response.data.error);
+            }
         } catch (error) {
-            setError('Failed to delete job application.');
+            setError(error.message);
             handleDeleteClose();
         } finally {
+            handleDeleteClose();
             setLoading(false);
         }
     };
