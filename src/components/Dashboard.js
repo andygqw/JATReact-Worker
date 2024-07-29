@@ -455,7 +455,7 @@ function Dashboard() {
                                 <Checkbox
                                     name="is_marked"
                                     checked={currentApplication?.is_marked || false}
-                                    onChange={(e) => setCurrentApplication((prevApplication) => ({ ...prevApplication, is_marked: e.target.checked }))}
+                                    onChange={(e) => setCurrentApplication((prevApplication) => ({ ...prevApplication, is_marked: Number(e.target.checked) }))}
                                 />
                             }
                             label="Is Marked"
