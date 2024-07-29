@@ -92,25 +92,47 @@ function Dashboard() {
         try {
             setLoading(true);
             if (isEditMode) {
-                await axios.post(`/applications/edit`, currentApplication);
-                setApplications((prevApplications) =>
-                    prevApplications.map((app) =>
-                        app.id === currentApplication.id ? currentApplication : app
-                    )
+                const response = await axios.post(`/applications/edit`, currentApplication,
+                    {
+                        validateStatus: function (status) {
+                            return status >= 200 && status <= 500;
+                        }
+                    }
                 );
+                if (response.status === 200){
+
+                    setApplications((prevApplications) =>
+                        prevApplications.map((app) =>
+                            app.id === currentApplication.id ? currentApplication : app
+                        )
+                    );
+                }
+                else {
+                    throw new Error(response.data.error);
+                }
             } else {
-                const response = await axios.post('/applications/add', currentApplication);
+                const response = await axios.post('/applications/add', currentApplication,
+                    {
+                        validateStatus: function (status) {
+                            return status >= 200 && status <= 500;
+                        }
+                    }
+                );
                 if (response.status === 200) {
+
                     const newApplication = { ...currentApplication, id: response.data.id };
                     setApplications((prevApplications) => [newApplication, ...prevApplications]);
                 } else {
-                    throw new Error('Failed to save job application.');
+
+                    throw new Error(response.data.error);
                 }
             }
+        }
+        catch (error) {
+            setError(error.message);
+        }
+        finally {
             handleClose();
-        } catch (error) {
-            setError(error.response?.data?.message);
-        } finally {
             setLoading(false);
         }
     };
@@ -143,7 +165,7 @@ function Dashboard() {
                 { url: quickAddUrl, date: getFormattedDate() },
                 {
                     validateStatus: function (status) {
-                        return status >= 200 && status < 500;
+                        return status >= 200 && status <= 500;
                     }
                 });
             if (response.status === 200) {
@@ -154,10 +176,12 @@ function Dashboard() {
             else {
                 throw new Error(response.data.error);
             }
-        } catch (error) {
+        }
+        catch (error) {
 
             setError(error.message);
-        } finally {
+        }
+        finally {
             handleQuickAddClose();
             setLoading(false);
         }

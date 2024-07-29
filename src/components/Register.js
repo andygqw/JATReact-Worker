@@ -26,7 +26,7 @@ function Register() {
             const response = await axios.post('/register',
                 { username, password, create_time },
                 {validateStatus: function (status) {
-                    return status >= 200 && status < 500;
+                    return status >= 200 && status <= 500;
                 }
             });
             if (response.status === 200) {

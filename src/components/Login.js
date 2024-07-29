@@ -16,13 +16,24 @@ function Login() {
         e.preventDefault();
         try {
 
-            const response = await axios.post('/login', { username, password });
-            localStorage.setItem('token', response.data.token);
-            navigate('/dashboard');
+            const response = await axios.post('/login', { username, password },
+                {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
+                    }
+                }
+            );
+            if (response.status === 200){
+                localStorage.setItem('token', response.data.token);
+                navigate('/dashboard');
+            }
+            else {
+                throw new Error(response.data.error);
+            }
         }
         catch (err) {
 
-            setError('Invalid username or password');
+            setError(err.message);
         }
     };
 
