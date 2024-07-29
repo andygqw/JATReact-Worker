@@ -133,7 +133,7 @@ export default {
         const password = body.password;
 
         if (!username || !password) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         // Authenticate the user
@@ -156,7 +156,7 @@ export default {
         // Parse token
         const authHeader = request.headers.get('Authorization');
         if (!authHeader) {
-          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 }));
         }
 
         const token = authHeader.split(' ')[1];
@@ -167,7 +167,7 @@ export default {
         const user_id = payload.USER_ID;
 
         if (!user_id) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         const query = 'SELECT * FROM job_applications WHERE user_id = ? ORDER BY application_date DESC, id DESC';
@@ -184,7 +184,7 @@ export default {
 
         const authHeader = request.headers.get('Authorization');
         if (!authHeader) {
-          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 }));
         }
 
         const token = authHeader.split(' ')[1];
@@ -235,7 +235,7 @@ export default {
         const authHeader = request.headers.get('Authorization');
 
         if (!authHeader) {
-          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 }));
         }
 
         const token = authHeader.split(' ')[1];
@@ -250,7 +250,7 @@ export default {
         const date = validString(body.date);
 
         if (!user_id || !date || !url || !url.includes("linkedin.com")) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         const response = await fetch(url, {
@@ -265,11 +265,11 @@ export default {
 
         if (response.status === 429) {
 
-          return new Response(JSON.stringify({ error: 'Too many requests to ' + url }), { status: 429 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Too many requests to ' + url }), { status: 429 }));
         }
         else if (!response.ok) {
 
-          return new Response(JSON.stringify({ error: 'Request failed on ' + url }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Request failed on ' + url }), { status: 400 }));
         }
 
         const text = await response.text();
@@ -349,7 +349,7 @@ export default {
 
         const authHeader = request.headers.get('Authorization');
         if (!authHeader) {
-          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 }));
         }
 
         const token = authHeader.split(' ')[1];
@@ -360,7 +360,7 @@ export default {
         const user_id = payload.USER_ID;
 
         if (!user_id) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         const body = await request.json();
@@ -380,7 +380,7 @@ export default {
         if (!Number.isInteger(body.id) || job_title === null ||
           company_name === null || status === null || !Number.isInteger(is_marked)) {
 
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         const query = 'UPDATE job_applications SET job_title = ?, company_name = ?,' +
@@ -401,7 +401,7 @@ export default {
 
         const authHeader = request.headers.get('Authorization');
         if (!authHeader) {
-          return new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Authorization header missing' }), { status: 401 }));
         }
 
         const token = authHeader.split(' ')[1];
@@ -420,7 +420,7 @@ export default {
         const ids = body.application_id;
 
         if (!ids) {
-          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 }));
         }
 
         var count = 0;

@@ -139,19 +139,26 @@ function Dashboard() {
         try {
 
             setLoading(true);
-            const response = await axios.post('/applications/quickadd', { url: quickAddUrl, date: getFormattedDate() });
+            const response = await axios.post('/applications/quickadd',
+                { url: quickAddUrl, date: getFormattedDate() },
+                {
+                    validateStatus: function (status) {
+                        return status >= 200 && status < 500;
+                    }
+                });
             if (response.status === 200) {
 
                 const newApplication = { ...response.data.application };
                 setApplications((prevApplications) => [newApplication, ...prevApplications]);
             }
             else {
-                throw new Error('Failed to quick add job application.');
+                throw new Error(response.data.error);
             }
-            handleQuickAddClose();
         } catch (error) {
-            setError(error.response?.data?.message);
+
+            setError(error.message);
         } finally {
+            handleQuickAddClose();
             setLoading(false);
         }
     };
