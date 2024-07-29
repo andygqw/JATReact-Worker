@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import './Dashboard.css';
 
+import Summary from './Summary';
 import { getFormattedDate } from '../utils/Helper.js';
 
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
@@ -26,16 +27,14 @@ function Dashboard() {
     const [applicationToDelete, setApplicationToDelete] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const [dataGridKey, setDataGridKey] = useState(0);
+
     useEffect(() => {
         const fetchApplications = async () => {
             setLoading(true);
             try {
                 const response = await axios.get('/applications');
-                if (response.status === 401 || response.status === 500) {
-                    navigate('/login');
-                } else {
-                    setApplications(response.data.results);
-                }
+                setApplications(response.data.results);
             } catch (error) {
                 setError(error.message);
                 navigate('/login');
@@ -106,6 +105,7 @@ function Dashboard() {
                             app.id === currentApplication.id ? currentApplication : app
                         )
                     );
+                    setDataGridKey((prevKey) => prevKey + 1);
                 }
                 else {
                     throw new Error(response.data.error);
@@ -262,6 +262,7 @@ function Dashboard() {
             <GridToolbarContainer>
                 <GridToolbarDensitySelector slotProps={{ tooltip: { title: 'Change density' } }} />
                 <Box sx={{ flexGrow: 1 }} />
+                <Summary applications={applications} />
                 <GridToolbarExport
                     printOptions={{ disableToolbarButton: true }}
                     slotProps={{
@@ -306,6 +307,7 @@ function Dashboard() {
                 </Box>
                 {error && <Alert severity="error" sx={{ marginBottom: 2 }}>{error}</Alert>}
                 <DataGrid
+                    key={dataGridKey}
                     rows={applications}
                     columns={columns}
                     pageSize={50}
