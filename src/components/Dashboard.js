@@ -2,7 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
+import {
+    Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+    TextField, Select, FormControl, InputLabel, Checkbox, FormControlLabel,
+    Avatar, IconButton, Menu, MenuItem
+} from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import './Dashboard.css';
 import Summary from './Summary';
 import { getFormattedDate } from '../utils/Helper.js';
@@ -29,6 +34,7 @@ function Dashboard() {
 
     const [dataGridKey, setDataGridKey] = useState(0);
 
+    const [anchorEl, setAnchorEl] = useState(null);
     const navigate = useNavigate();
     const errorTimeoutRef = useRef(null);
 
@@ -264,6 +270,14 @@ function Dashboard() {
         }
     };
 
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
     const columns = [
         { field: 'job_title', headerName: 'Job Title', flex: 0.2, sortable: true, filterable: true, editable: false },
         { field: 'company_name', headerName: 'Company', flex: 0.2, sortable: true, filterable: true, editable: false },
@@ -329,36 +343,23 @@ function Dashboard() {
                     <Typography variant="h4" component="h1" fontWeight="bold">
                         Dashboard
                     </Typography>
-                    <Box display="flex" gap={2}>
-                        <Button
-                            onClick={handleUserDetailsOpen}
-                            variant="contained"
-                            color="primary"
-                        >
-                            {userDetails.username}
-                        </Button>
-                        <Button
-                            onClick={handleLogout}
-                            variant="contained"
-                            sx={{ backgroundColor: '#6c757d', color: '#fff', '&:hover': { backgroundColor: '#5a6268' } }}
-                        >
-                            Logout
-                        </Button>
+                    <Box display="flex" alignItems="center" gap={2}>
+                        <IconButton onClick={handleMenuClick} size="large" edge="end">
+                            <Avatar>
+                                <AccountCircleIcon />
+                            </Avatar>
+                        </IconButton>
+                        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                            <MenuItem onClick={handleUserDetailsOpen}>Profile</MenuItem>
+                            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                        </Menu>
                     </Box>
                 </Box>
                 <Box display="flex" gap={2} mb={2}>
-                    <Button
-                        onClick={handleAddOpen}
-                        variant="contained"
-                        color="secondary"
-                    >
+                    <Button onClick={handleAddOpen} variant="contained" color="secondary">
                         Add Job
                     </Button>
-                    <Button
-                        onClick={handleQuickAddOpen}
-                        variant="contained"
-                        color="primary"
-                    >
+                    <Button onClick={handleQuickAddOpen} variant="contained" color="primary">
                         Quick Add
                     </Button>
                 </Box>
@@ -559,7 +560,7 @@ function Dashboard() {
                     <DialogTitle>Edit User Details</DialogTitle>
                     <DialogContent>
                         {validationError && <Alert severity="error" sx={{ marginBottom: 2 }}>{validationError}</Alert>}
-                        {/* <TextField
+                        <TextField
                             label="Username"
                             name="username"
                             value={userDetails.username}
@@ -567,7 +568,7 @@ function Dashboard() {
                             fullWidth
                             margin="normal"
                             required
-                        /> */}
+                        />
                         <TextField
                             label="Quick Add Resume Version"
                             name="quickAddResumeVersion"
