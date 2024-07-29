@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
@@ -12,11 +12,11 @@ const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewin
 
 
 function Dashboard() {
+
     const [applications, setApplications] = useState([]);
     const [open, setOpen] = useState(false);
     const [currentApplication, setCurrentApplication] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const navigate = useNavigate();
 
     const [quickAddOpen, setQuickAddOpen] = useState(false);
     const [quickAddUrl, setQuickAddUrl] = useState('');
@@ -27,7 +27,11 @@ function Dashboard() {
     const [applicationToDelete, setApplicationToDelete] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Used to force re-render data-grid's rows
     const [dataGridKey, setDataGridKey] = useState(0);
+
+    const navigate = useNavigate();
+    const errorTimeoutRef = useRef(null);
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -45,6 +49,16 @@ function Dashboard() {
 
         fetchApplications();
     }, [navigate]);
+
+    useEffect(() => {
+        if (error) {
+          clearTimeout(errorTimeoutRef.current);
+          errorTimeoutRef.current = setTimeout(() => {
+            setError(null);
+          }, 5000); //5 seconds
+        }
+        return () => clearTimeout(errorTimeoutRef.current);
+    }, [error]);
 
     const handleOpen = (application) => {
         setCurrentApplication(application);
