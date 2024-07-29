@@ -147,7 +147,6 @@ function Dashboard() {
             const response = await axios.post('/applications/quickadd', { url: quickAddUrl, date: getFormattedDate() });
             if (response.status === 200) {
 
-                //TODO: row id!
                 const newApplication = { ...response.data.application };
                 setApplications((prevApplications) => [newApplication, ...prevApplications]);
             }

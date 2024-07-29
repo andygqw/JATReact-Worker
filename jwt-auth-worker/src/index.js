@@ -8,61 +8,61 @@ const USER_ID = 'user_id';
 const PASSWORD = 'password';
 
 function base64urlEncode(str) {
-	// return btoa(str)
-	//   .replace(/=/g, '')
-	//   .replace(/\+/g, '-')
-	//   .replace(/\//g, '_');
-	return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-            return String.fromCharCode('0x' + p1);
+  // return btoa(str)
+  //   .replace(/=/g, '')
+  //   .replace(/\+/g, '-')
+  //   .replace(/\//g, '_');
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    function toSolidBytes(match, p1) {
+      return String.fromCharCode('0x' + p1);
     }));
 }
 
 function base64urlDecode(str) {
 
-	return decodeURIComponent(atob(str).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+  return decodeURIComponent(atob(str).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
 }
 
 // Utility function to create a HMAC SHA-256 signature
 async function createSignature(header, payload, secret) {
 
-	const enc = new TextEncoder();
-	const key = await crypto.subtle.importKey(
-	  'raw',
-	  enc.encode(secret),
-	  { name: 'HMAC', hash: 'SHA-256' },
-	  false,
-	  ['sign']
-	);
-	const data = `${header}.${payload}`;
-	const signature = await crypto.subtle.sign('HMAC', key, enc.encode(data));
-	return base64urlEncode(String.fromCharCode(...new Uint8Array(signature)));
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const data = `${header}.${payload}`;
+  const signature = await crypto.subtle.sign('HMAC', key, enc.encode(data));
+  return base64urlEncode(String.fromCharCode(...new Uint8Array(signature)));
 }
 
 // Function to create a JWT
 async function createJWT(payload, secret) {
 
-	const header = base64urlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-	const encodedPayload = base64urlEncode(JSON.stringify(payload));
-	const signature = await createSignature(header, encodedPayload, secret);
-	return `${header}.${encodedPayload}.${signature}`;
+  const header = base64urlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const encodedPayload = base64urlEncode(JSON.stringify(payload));
+  const signature = await createSignature(header, encodedPayload, secret);
+  return `${header}.${encodedPayload}.${signature}`;
 }
 
 // Function to verify a JWT
 async function verifyJWT(token, secret) {
-	
-	const [header, payload, signature] = token.split('.');
-	const validSignature = await createSignature(header, payload, secret);
-	if (signature !== validSignature) {
-		throw new Error('Invalid token');
-	}
-	const decodedPayload = JSON.parse(base64urlDecode(payload));
-	if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
-		throw new Error('Token expired');
-	}
-	return decodedPayload;
+
+  const [header, payload, signature] = token.split('.');
+  const validSignature = await createSignature(header, payload, secret);
+  if (signature !== validSignature) {
+    throw new Error('Invalid token');
+  }
+  const decodedPayload = JSON.parse(base64urlDecode(payload));
+  if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
+    throw new Error('Token expired');
+  }
+  return decodedPayload;
 }
 
 // async function parseUserIdFromHeader(authHeader){
@@ -76,7 +76,7 @@ async function verifyJWT(token, secret) {
 // }
 
 // Data Manipulation
-function validString(str){
+function validString(str) {
 
   if (str === null || str === undefined || str.trim() === "") {
 
@@ -111,7 +111,7 @@ export default {
     if (request.method === 'OPTIONS') {
       return handleOptions(request);
     }
-    
+
 
     try {
       const db = env.DB;
@@ -128,7 +128,7 @@ export default {
         // Parse the JSON body from the request
         const body = await request.json();
 
-		    const username = body.username;
+        const username = body.username;
         const password = body.password;
 
         if (!username || !password) {
@@ -142,13 +142,13 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid username or password' }), { status: 401 });
         }
 
-		    const payload = { USERNAME: username, USER_ID: user.id, exp: Math.floor(Date.now() / 1000) + 3600};//1hour
+        const payload = { USERNAME: username, USER_ID: user.id, exp: Math.floor(Date.now() / 1000) + 3600 };//1hour
         const token = await createJWT(payload, JWT_SECRET);
 
         return addCorsHeaders(new Response(JSON.stringify({ token }), {
           headers: { 'Content-Type': 'application/json' },
         }));
-      } 
+      }
       //ENDPOINT: APPLICATIONS
       else if (method === 'GET' && pathname === "/applications") {
 
@@ -177,7 +177,7 @@ export default {
         return addCorsHeaders(new Response(JSON.stringify(data), {
           headers: { 'Content-Type': 'application/json' },
         }));
-      } 
+      }
       //ENDPOINT: ADD APPLICATION
       else if (method === 'POST' && pathname === "/applications/add") {
 
@@ -212,25 +212,25 @@ export default {
         }
 
         const query = 'INSERT INTO job_applications (user_id, job_title, company_name, ' +
-        'job_description, job_location, job_url, application_deadline_date, application_date, ' +
-        'resume_version, status, notes, is_marked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+          'job_description, job_location, job_url, application_deadline_date, application_date, ' +
+          'resume_version, status, notes, is_marked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         const sql = 'SELECT last_insert_rowid() as id';
 
         const rows = await db.batch([
-          db.prepare(query).bind(user_id, job_title, company_name, job_description, 
+          db.prepare(query).bind(user_id, job_title, company_name, job_description,
             job_location, job_url, application_deadline_date, application_date, resume_version,
             status, notes, is_marked),
           db.prepare(sql),
         ]);
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, id: rows[1].results[0].id  }), {
+        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, id: rows[1].results[0].id }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
       //ENDPOINT: QUICK ADD
-      else if (method === 'POST' && pathname === "/applications/quickadd") {  
-        
+      else if (method === 'POST' && pathname === "/applications/quickadd") {
+
         const authHeader = request.headers.get('Authorization');
 
         if (!authHeader) {
@@ -251,7 +251,7 @@ export default {
         if (!user_id || !date || !url || !url.includes("linkedin.com")) {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
-        
+
         const response = await fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0'
@@ -262,7 +262,7 @@ export default {
         var query = 'SELECT quickAddResumeVersion FROM config WHERE user_id = ?';
         const config = await db.prepare(query).bind(user_id).first();
 
-        if(response.status === 429){
+        if (response.status === 429) {
 
           return new Response(JSON.stringify({ error: 'Too many requests to ' + url }), { status: 429 });
         }
@@ -315,8 +315,8 @@ export default {
         const is_marked = 0;
 
         query = 'INSERT INTO job_applications (user_id, job_title, company_name, ' +
-        'job_location, job_url, application_date, resume_version, status, is_marked)' +
-        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+          'job_location, job_url, application_date, resume_version, status, is_marked)' +
+          ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         const sql = 'SELECT last_insert_rowid() as id';
 
@@ -326,7 +326,20 @@ export default {
           db.prepare(sql),
         ]);
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, id: rows[1].results[0].id  }), {
+        const application = {
+          id: rows[1].results[0].id,
+          user_id: user_id,
+          job_title: job_title,
+          company_name: company_name,
+          job_location: job_location,
+          job_url: job_url,
+          application_date: application_date,
+          resume_version: resume_version,
+          status: status,
+          is_marked: is_marked
+        };
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, application:application}), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
@@ -363,20 +376,20 @@ export default {
         const notes = validString(body.notes);
         const is_marked = body.is_marked ? 1 : 0;
 
-        if (!Number.isInteger(body.id)|| job_title === null ||
-            company_name === null || status === null || !Number.isInteger(is_marked)) {
+        if (!Number.isInteger(body.id) || job_title === null ||
+          company_name === null || status === null || !Number.isInteger(is_marked)) {
 
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
         const query = 'UPDATE job_applications SET job_title = ?, company_name = ?,' +
-        'job_description = ?, job_location = ?, job_url = ?, application_deadline_date = ?,' +
-        'application_date = ?, resume_version = ?, status = ?, notes = ?, is_marked = ?' +
-        'WHERE id = ? and user_id = ?';
+          'job_description = ?, job_location = ?, job_url = ?, application_deadline_date = ?,' +
+          'application_date = ?, resume_version = ?, status = ?, notes = ?, is_marked = ?' +
+          'WHERE id = ? and user_id = ?';
 
-        const info = await db.prepare(query).bind(job_title, company_name, job_description, 
-        job_location, job_url, application_deadline_date, application_date, resume_version,
-        status, notes, is_marked, body.id, user_id).run();
+        const info = await db.prepare(query).bind(job_title, company_name, job_description,
+          job_location, job_url, application_deadline_date, application_date, resume_version,
+          status, notes, is_marked, body.id, user_id).run();
 
         return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },
@@ -414,10 +427,10 @@ export default {
 
           const query = 'DELETE FROM job_applications WHERE id = ? and user_id = ?';
           const info = await db.prepare(query).bind(id, user_id).run();
-          if(info.success) count++;
+          if (info.success) count++;
         }
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: count}), {
+        return addCorsHeaders(new Response(JSON.stringify({ success: count }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
@@ -426,7 +439,7 @@ export default {
       else {
         return new Response('Not Found', { status: 404 });
       }
-    } 
+    }
     catch (e) {
       return addCorsHeaders(new Response('Internal Error: ' + e, { status: 500 }));
     }
