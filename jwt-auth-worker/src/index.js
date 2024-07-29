@@ -454,7 +454,7 @@ export default {
 
         if (user) {
 
-          return new Response(JSON.stringify({ error: 'Username already exists' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Username already exists' }), { status: 400 }));
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -482,13 +482,13 @@ export default {
         }
         else {
 
-          return new Response(JSON.stringify({ error: 'Registration failed' }), { status: 400 });
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Registration failed' }), { status: 400 }));
         }
       }
 
       //ENDPOINT: FALL THROUGH DEFAULT NOT FOUND
       else {
-        return new Response('Not Found', { status: 404 });
+        return addCorsHeaders(new Response('Not Found', { status: 404 }));
       }
     }
     catch (e) {

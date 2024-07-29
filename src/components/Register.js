@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Paper, Alert, Grid  } from '@mui/material';
+import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Paper, Alert, Grid } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from '../utils/api';
 
@@ -23,14 +23,18 @@ function Register() {
         try {
 
             const create_time = getFormattedDate();
-            const response = await axios.post('/register', { username, password, create_time});
+            const response = await axios.post('/register',
+                { username, password, create_time },
+                {validateStatus: function (status) {
+                    return status >= 200 && status < 500;
+                }
+            });
             if (response.status === 200) {
 
                 navigate('/login');
             }
             else {
-
-                throw new Error('Failed to register');
+                throw new Error(response.data.error);
             }
         }
         catch (err) {
