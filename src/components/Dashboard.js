@@ -47,42 +47,19 @@ function Dashboard() {
             try {
 
                 const response = await axios.get('/applications');
-                setApplications(response.data.results);
+                if(response.status === 401 || response.status === 500){
+
+                    navigate('/login');
+                }
+                else{
+
+                    setApplications(response.data.results);
+                }
             } 
             catch (error) {
-                if (error.response) {
-                    
-                    if (error.response.status === 401) {
 
-                        setError('Unauthorized access. Please log in.');
-                        navigate('/login');
-                    } 
-                    else if (error.response.status === 403) {
-
-                        setError('Forbidden. You do not have permission to view this resource.');
-                    } 
-                    else if (error.response.status === 404) {
-
-                        setError('Applications not found.');
-                    }
-                    else if (error.response.status === 500) {
-
-                        setError(error.response);
-                        navigate('/login');
-                    } 
-                    else {
-
-                        setError('An unexpected error occurred.');
-                    }
-                } 
-                else if (error.request) {
-                
-                    setError('No response from the server. Please try again later.');
-                } 
-                else {
-                
-                    setError('An error occurred while setting up the request.');
-                }
+                setError(error.message);
+                navigate('/login');
             }finally{
 
                 setLoading(false);
@@ -212,6 +189,12 @@ function Dashboard() {
         }
     };
 
+    const handleLogout = () => {
+
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
+
     const columns = [
 
         { field: 'job_title', headerName: 'Job Title', flex: 0.2,
@@ -303,9 +286,18 @@ function Dashboard() {
     return (
         <Box sx={{ padding: 4 }}>
         <Box sx={{ height: '100vh', width: '100%' }}>
-            <Typography variant="h4" gutterBottom>
-            Dashboard
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h4" gutterBottom>
+                    Dashboard
+                </Typography>
+                <Button
+                    onClick={handleLogout}
+                    variant="contained"
+                    color="error"
+                >
+                    Logout
+                </Button>
+            </Box>
             <Button
                 onClick={handleAddOpen}
                 variant="contained"
