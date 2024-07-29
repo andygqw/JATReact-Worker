@@ -265,11 +265,11 @@ export default {
 
         if (response.status === 429) {
 
-          return addCorsHeaders(new Response(JSON.stringify({ error: 'Too many requests to ' + url }), { status: 429 }));
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Requsted site busy, try again! ' }), { status: 429 }));
         }
         else if (!response.ok) {
 
-          return addCorsHeaders(new Response(JSON.stringify({ error: 'Request failed on ' + url }), { status: 400 }));
+          return addCorsHeaders(new Response(JSON.stringify({ error: 'Request failed'}), { status: 400 }));
         }
 
         const text = await response.text();
