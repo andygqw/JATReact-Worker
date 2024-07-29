@@ -4,15 +4,12 @@ import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import './Dashboard.css';
-
 import Summary from './Summary';
 import { getFormattedDate } from '../utils/Helper.js';
 
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
 
-
 function Dashboard() {
-
     const [applications, setApplications] = useState([]);
     const [open, setOpen] = useState(false);
     const [currentApplication, setCurrentApplication] = useState(null);
@@ -27,7 +24,9 @@ function Dashboard() {
     const [applicationToDelete, setApplicationToDelete] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Used to force re-render data-grid's rows
+    const [userDetailsOpen, setUserDetailsOpen] = useState(false);
+    const [userDetails, setUserDetails] = useState({ username: '', quickAddResumeVersion: '' });
+
     const [dataGridKey, setDataGridKey] = useState(0);
 
     const navigate = useNavigate();
@@ -52,13 +51,26 @@ function Dashboard() {
 
     useEffect(() => {
         if (error) {
-          clearTimeout(errorTimeoutRef.current);
-          errorTimeoutRef.current = setTimeout(() => {
-            setError(null);
-          }, 5000); //5 seconds
+            clearTimeout(errorTimeoutRef.current);
+            errorTimeoutRef.current = setTimeout(() => {
+                setError(null);
+            }, 5000); //5 seconds
         }
         return () => clearTimeout(errorTimeoutRef.current);
     }, [error]);
+
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            try {
+                const response = await axios.get('/user/details');
+                setUserDetails(response.data);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
+        fetchUserDetails();
+    }, []);
 
     const handleOpen = (application) => {
         setCurrentApplication(application);
@@ -105,47 +117,37 @@ function Dashboard() {
         try {
             setLoading(true);
             if (isEditMode) {
-                const response = await axios.post(`/applications/edit`, currentApplication,
-                    {
-                        validateStatus: function (status) {
-                            return status >= 200 && status <= 500;
-                        }
+                const response = await axios.post(`/applications/edit`, currentApplication, {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
                     }
-                );
-                if (response.status === 200){
-
+                });
+                if (response.status === 200) {
                     setApplications((prevApplications) =>
                         prevApplications.map((app) =>
                             app.id === currentApplication.id ? currentApplication : app
                         )
                     );
                     setDataGridKey((prevKey) => prevKey + 1);
-                }
-                else {
+                } else {
                     throw new Error(response.data.error);
                 }
             } else {
-                const response = await axios.post('/applications/add', currentApplication,
-                    {
-                        validateStatus: function (status) {
-                            return status >= 200 && status <= 500;
-                        }
+                const response = await axios.post('/applications/add', currentApplication, {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
                     }
-                );
+                });
                 if (response.status === 200) {
-
                     const newApplication = { ...currentApplication, id: response.data.id };
                     setApplications((prevApplications) => [newApplication, ...prevApplications]);
                 } else {
-
                     throw new Error(response.data.error);
                 }
             }
-        }
-        catch (error) {
+        } catch (error) {
             setError(error.message);
-        }
-        finally {
+        } finally {
             handleClose();
             setLoading(false);
         }
@@ -166,36 +168,27 @@ function Dashboard() {
     };
 
     const handleQuickAddSubmit = async () => {
-
         if (!quickAddUrl) {
             setValidationError('URL is required.');
             return;
         }
 
         try {
-
             setLoading(true);
-            const response = await axios.post('/applications/quickadd',
-                { url: quickAddUrl, date: getFormattedDate() },
-                {
-                    validateStatus: function (status) {
-                        return status >= 200 && status <= 500;
-                    }
-                });
+            const response = await axios.post('/applications/quickadd', { url: quickAddUrl, date: getFormattedDate() }, {
+                validateStatus: function (status) {
+                    return status >= 200 && status <= 500;
+                }
+            });
             if (response.status === 200) {
-
                 const newApplication = { ...response.data.application };
                 setApplications((prevApplications) => [newApplication, ...prevApplications]);
-            }
-            else {
+            } else {
                 throw new Error(response.data.error);
             }
-        }
-        catch (error) {
-
+        } catch (error) {
             setError(error.message);
-        }
-        finally {
+        } finally {
             handleQuickAddClose();
             setLoading(false);
         }
@@ -214,19 +207,14 @@ function Dashboard() {
     const handleDeleteConfirm = async () => {
         try {
             setLoading(true);
-            const response = await axios.post('/applications/delete', { application_id: [applicationToDelete] },
-                {
-                    validateStatus: function (status) {
-                        return status >= 200 && status <= 500;
-                    }
+            const response = await axios.post('/applications/delete', { application_id: [applicationToDelete] }, {
+                validateStatus: function (status) {
+                    return status >= 200 && status <= 500;
                 }
-            );
-            if (response.status === 200){
-
+            });
+            if (response.status === 200) {
                 setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
-            }
-            else {
-
+            } else {
                 throw new Error(response.data.error);
             }
         } catch (error) {
@@ -241,6 +229,39 @@ function Dashboard() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
+    };
+
+    const handleUserDetailsOpen = () => {
+        setUserDetailsOpen(true);
+    };
+
+    const handleUserDetailsClose = () => {
+        setUserDetailsOpen(false);
+        setValidationError('');
+    };
+
+    const handleUserDetailsChange = (e) => {
+        const { name, value } = e.target;
+        setUserDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
+    };
+
+    const handleUserDetailsSubmit = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.post('/user/update', userDetails, {
+                validateStatus: function (status) {
+                    return status >= 200 && status <= 500;
+                }
+            });
+            if (response.status !== 200) {
+                throw new Error(response.data.error);
+            }
+            handleUserDetailsClose();
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const columns = [
@@ -308,13 +329,22 @@ function Dashboard() {
                     <Typography variant="h4" component="h1" fontWeight="bold">
                         Dashboard
                     </Typography>
-                    <Button
-                        onClick={handleLogout}
-                        variant="contained"
-                        sx={{ backgroundColor: '#6c757d', color: '#fff', '&:hover': { backgroundColor: '#5a6268' } }}
-                    >
-                        Logout
-                    </Button>
+                    <Box display="flex" gap={2}>
+                        <Button
+                            onClick={handleUserDetailsOpen}
+                            variant="contained"
+                            color="primary"
+                        >
+                            {userDetails.username}
+                        </Button>
+                        <Button
+                            onClick={handleLogout}
+                            variant="contained"
+                            sx={{ backgroundColor: '#6c757d', color: '#fff', '&:hover': { backgroundColor: '#5a6268' } }}
+                        >
+                            Logout
+                        </Button>
+                    </Box>
                 </Box>
                 <Box display="flex" gap={2} mb={2}>
                     <Button
@@ -521,6 +551,37 @@ function Dashboard() {
                             Cancel
                         </Button>
                         <Button onClick={handleSubmit} color="primary">
+                            Submit
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                <Dialog open={userDetailsOpen} onClose={handleUserDetailsClose}>
+                    <DialogTitle>Edit User Details</DialogTitle>
+                    <DialogContent>
+                        {validationError && <Alert severity="error" sx={{ marginBottom: 2 }}>{validationError}</Alert>}
+                        {/* <TextField
+                            label="Username"
+                            name="username"
+                            value={userDetails.username}
+                            onChange={handleUserDetailsChange}
+                            fullWidth
+                            margin="normal"
+                            required
+                        /> */}
+                        <TextField
+                            label="Quick Add Resume Version"
+                            name="quickAddResumeVersion"
+                            value={userDetails.quickAddResumeVersion}
+                            onChange={handleUserDetailsChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleUserDetailsClose} color="secondary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleUserDetailsSubmit} color="primary">
                             Submit
                         </Button>
                     </DialogActions>

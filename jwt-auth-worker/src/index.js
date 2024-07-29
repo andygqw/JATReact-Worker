@@ -116,6 +116,23 @@ async function handleGetApplications(request, db, JWT_SECRET) {
   return addCorsHeaders(new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } }));
 }
 
+async function handlerUserDetails(request, db, JWT_SECRET) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader) throw new Error('Authorization header missing');
+  const token = authHeader.split(' ')[1];
+  const payload = await verifyJWT(token, JWT_SECRET);
+  const query = 'SELECT username FROM users WHERE id = ?';
+  const query2 = 'SELECT quickAddResumeVersion FROM config WHERE user_id = ?';
+  const rows = await db.batch([
+    db.prepare(query).bind(payload.USER_ID),
+    db.prepare(query2).bind(payload.USER_ID),
+  ]);
+  return addCorsHeaders(new Response(JSON.stringify({
+    username: rows[0].results[0].username,
+    quickAddResumeVersion: rows[1].results[0].quickAddResumeVersion
+  }), { headers: { 'Content-Type': 'application/json' } }));
+}
+
 async function handleAddApplication(request, db, JWT_SECRET) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) throw new Error('Authorization header missing');
@@ -227,6 +244,22 @@ async function handleDeleteApplication(request, db, JWT_SECRET) {
   return addCorsHeaders(new Response(JSON.stringify({ success: count }), { headers: { 'Content-Type': 'application/json' } }));
 }
 
+async function handleUserUpdate(request, db, JWT_SECRET){
+
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader) throw new Error('Authorization header missing');
+  const token = authHeader.split(' ')[1];
+  const payload = await verifyJWT(token, JWT_SECRET);
+  const user_id = payload.USER_ID;
+  const body = await parseBody(request);
+
+  const quickAddResumeVersion = validString(body.quickAddResumeVersion);
+
+  await db.prepare('UPDATE config SET quickAddResumeVersion = ? WHERE user_id = ?').bind(quickAddResumeVersion, user_id).run();
+
+  return addCorsHeaders(new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } }));
+}
+
 async function handleRegister(request, db) {
   const body = await parseBody(request);
   const { username, password, create_time } = body;
@@ -256,6 +289,8 @@ export default {
           return await handleLogin(request, db, JWT_SECRET);
         case method === 'GET' && pathname === '/applications':
           return await handleGetApplications(request, db, JWT_SECRET);
+        case method === 'GET' && pathname === '/user/details':
+          return await handlerUserDetails(request, db, JWT_SECRET);
         case method === 'POST' && pathname === '/applications/add':
           return await handleAddApplication(request, db, JWT_SECRET);
         case method === 'POST' && pathname === '/applications/quickadd':
@@ -264,6 +299,8 @@ export default {
           return await handleEditApplication(request, db, JWT_SECRET);
         case method === 'POST' && pathname === '/applications/delete':
           return await handleDeleteApplication(request, db, JWT_SECRET);
+        case method === 'POST' && pathname === '/user/update':
+          return await handleUserUpdate(request, db, JWT_SECRET);
         case method === 'POST' && pathname === '/register':
           return await handleRegister(request, db);
         default:
