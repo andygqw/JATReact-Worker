@@ -340,7 +340,7 @@ export default {
           is_marked: is_marked
         };
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, application:application}), {
+        return addCorsHeaders(new Response(JSON.stringify({ success: rows[0].success, application: application }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
@@ -442,8 +442,9 @@ export default {
 
         const username = body.username;
         const password = body.password;
+        const create_time = body.create_time;
 
-        if (!username || !password) {
+        if (!username || !password || !create_time) {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
@@ -451,22 +452,38 @@ export default {
 
         const user = await db.prepare(getUser).bind(username).first();
 
-        if (user){
+        if (user) {
 
           return new Response(JSON.stringify({ error: 'Username already exists' }), { status: 400 });
         }
 
         const salt = await bcrypt.genSalt(10);
 
-        const hashedPassword = await bcrypt.hash(user.password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+        const sql = 'SELECT last_insert_rowid() as id';
+        const sql2 =
+          'INSERT INTO config (user_id, create_time, quickAddResumeVersion)' +
+          ' VALUES (?, ?, ?)';
 
-        const info = await db.prepare(query).bind(username, hashedPassword).run();
+        const rows = await db.batch([
+          db.prepare(query).bind(username, hashedPassword),
+          db.prepare(sql),
+        ]);
 
-        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
-          headers: { 'Content-Type': 'application/json' },
-        }));
+        if (rows[0].success === true){
+
+          const info = await db.prepare(sql2).bind(rows[1].results[0].id, create_time, '').run();
+
+          return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
+            headers: { 'Content-Type': 'application/json' },
+          }));
+        }
+        else {
+
+          return new Response(JSON.stringify({ error: 'Registration failed' }), { status: 400 });
+        }
       }
 
       //ENDPOINT: FALL THROUGH DEFAULT NOT FOUND

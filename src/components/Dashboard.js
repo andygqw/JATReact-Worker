@@ -5,15 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import './Dashboard.css';
 
+import { getFormattedDate } from '../utils/Helper.js';
+
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
 
-function getFormattedDate() {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
 
 function Dashboard() {
     const [applications, setApplications] = useState([]);

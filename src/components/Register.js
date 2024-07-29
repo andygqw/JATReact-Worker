@@ -4,6 +4,8 @@ import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Pap
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from '../utils/api';
 
+import { getFormattedDate } from '../utils/Helper.js';
+
 function Register() {
 
     const [username, setUsername] = useState('');
@@ -20,7 +22,8 @@ function Register() {
         }
         try {
 
-            const response = await axios.post('/register', { username, password });
+            const create_time = getFormattedDate();
+            const response = await axios.post('/register', { username, password, create_time});
             if (response.status === 200) {
 
                 navigate('/login');
