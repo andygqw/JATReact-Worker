@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Grid, Paper, Alert } from '@mui/material';
+import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Paper, Alert, Grid  } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from '../utils/api';
 
-function Login() {
+function Register() {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
-
+    const handleRegister = async (e) => {
         e.preventDefault();
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
         try {
 
-            const response = await axios.post('/login', { username, password });
-            localStorage.setItem('token', response.data.token);
-            navigate('/dashboard');
+            const response = await axios.post('/register', { username, password });
+            if (response.status === 200) {
+
+                navigate('/login');
+            }
+            else {
+
+                throw new Error('Failed to register');
+            }
         }
         catch (err) {
 
-            setError('Invalid username or password');
+            setError('Failed to register');
         }
     };
 
@@ -35,14 +45,14 @@ function Login() {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Register
                     </Typography>
                     {error && (
                         <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
                             {error}
                         </Alert>
                     )}
-                    <Box component="form" onSubmit={handleLogin} sx={{ mt: 1 }}>
+                    <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
                             required
@@ -63,9 +73,20 @@ function Login() {
                             label="Password"
                             type="password"
                             id="password"
-                            autoComplete="current-password"
+                            autoComplete="new-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="confirmPassword"
+                            label="Confirm Password"
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                         <Button
                             type="submit"
@@ -73,12 +94,12 @@ function Login() {
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
                         >
-                            Sign In
+                            Register
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link to="/register" variant="body2">
-                                    {"Don't have an account? Register"}
+                                <Link to="/login" variant="body2">
+                                    {"Already have an account? Log In"}
                                 </Link>
                             </Grid>
                         </Grid>
@@ -89,4 +110,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default Register;

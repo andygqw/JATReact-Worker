@@ -106,14 +106,15 @@ function addCorsHeaders(response) {
 
 
 export default {
+
   async fetch(request, env, ctx) {
 
     if (request.method === 'OPTIONS') {
       return handleOptions(request);
     }
 
-
     try {
+
       const db = env.DB;
       const JWT_SECRET = env.JWT_SECRET;
 
@@ -431,6 +432,26 @@ export default {
         }
 
         return addCorsHeaders(new Response(JSON.stringify({ success: count }), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      //ENDPOINT: REGISTER
+      else if (method === 'POST' && pathname === "/register") {
+
+        const body = await request.json();
+
+        const username = body.username;
+        const password = body.password;
+
+        if (!username || !password) {
+          return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
+        }
+
+        const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+
+        const info = await db.prepare(query).bind(username, password).run();
+
+        return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },
         }));
       }
