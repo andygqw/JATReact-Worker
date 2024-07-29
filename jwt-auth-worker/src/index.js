@@ -447,9 +447,22 @@ export default {
           return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
         }
 
+        const getUser = 'SELECT * FROM users WHERE username = ?';
+
+        const user = await db.prepare(getUser).bind(username).first();
+
+        if (user){
+
+          return new Response(JSON.stringify({ error: 'Username already exists' }), { status: 400 });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+
+        const hashedPassword = await bcrypt.hash(user.password, salt);
+
         const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
 
-        const info = await db.prepare(query).bind(username, password).run();
+        const info = await db.prepare(query).bind(username, hashedPassword).run();
 
         return addCorsHeaders(new Response(JSON.stringify({ success: info.success }), {
           headers: { 'Content-Type': 'application/json' },

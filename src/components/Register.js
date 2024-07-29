@@ -32,7 +32,7 @@ function Register() {
         }
         catch (err) {
 
-            setError('Failed to register');
+            setError(err.message);
         }
     };
 
