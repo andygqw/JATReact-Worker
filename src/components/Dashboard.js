@@ -564,10 +564,11 @@ function Dashboard() {
                             label="Username"
                             name="username"
                             value={userDetails.username}
-                            onChange={handleUserDetailsChange}
+                            //onChange={handleUserDetailsChange}
                             fullWidth
                             margin="normal"
-                            required
+                            //required
+                            disabled
                         />
                         <TextField
                             label="Quick Add Resume Version"
