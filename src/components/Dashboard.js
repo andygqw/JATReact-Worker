@@ -8,6 +8,7 @@ import {
     Avatar, IconButton, Menu, MenuItem
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DeleteIcon from '@mui/icons-material/Delete'
 import './Dashboard.css';
 import Summary from './Summary';
 import { getFormattedDate } from '../utils/Helper.js';
@@ -305,16 +306,16 @@ function Dashboard() {
             editable: false,
             disableColumnMenu: true,
             renderCell: (params) => (
-                <Button
+                <IconButton
                     onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteOpen(params.row.id);
                     }}
-                    variant="contained"
-                    color="primary"
+                    aria-label="delete"
+                    color="gray"
                 >
-                    Delete
-                </Button>
+                    <DeleteIcon />
+                </IconButton>
             ),
         },
     ];
