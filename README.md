@@ -1,70 +1,166 @@
-# Getting Started with Create React App
+# Job Application Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern job application tracking app built with React, MUI, and Cloudflare Workers. This application allows users to manage their job applications, with features like adding, editing, deleting applications, and viewing job application summaries. The backend is powered by Cloudflare Workers with JWT authentication.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **User Authentication**: Login and registration using JWT.
+- **Job Application Management**: Add, edit, and delete job applications.
+- **Quick Add**: Quickly add job applications from LinkedIn URLs.
+- **Responsive UI**: Modern UI/UX with dark/light mode support.
+- **Summary Toolbar**: Brief summary of job applications.
+- **Profile Management**: Edit user details and settings.
+- **Real-time Updates**: Immediate updates to the application grid on changes.
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React, MUI (Material-UI)
+- **Backend**: Cloudflare Workers, Node.js
+- **Authentication**: JWT (JSON Web Tokens)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Access Online
 
-### `npm test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Need to register
 
-### `npm run build`
+### Step
+1. go to [Dev Deploy Site](https://jatreact-worker.pages.dev)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Installation on local
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Node.js (18.17.1) since CloudFlare Workers only support up to 18.17.1
+- CloudFlare account
+- CloudFlare's Wrangler (cli)
 
-### `npm run eject`
+### Setup
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Clone the repository**:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    ```bash
+    git clone https://github.com/andygqw/JATReact-Worker.git
+    cd JAT-REACT
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. **Install dependencies**:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3. **Set up Cloudflare Workers**:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    - Install Cloudflare Wrangler:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    ```bash
+    cd jwt-auth-worker
+    npm install
+    npm install -g wrangler
+    ```
 
-### Code Splitting
+    - Login to Cloudflare:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+    ```bash
+    wrangler login
+    ```
 
-### Analyzing the Bundle Size
+    - Configure Wrangler (inside the project directory):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    ```bash
+    wrangler init
+    ```
 
-### Making a Progressive Web App
+    - Update `wrangler.toml` with your Cloudflare account details:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+    ```toml
+    name = "job-application-tracker"
+    type = "javascript"
+    account_id = "your-cloudflare-account-id"
+    workers_dev = true
+    compatibility_date = "2023-01-01"
 
-### Advanced Configuration
+    [[kv_namespaces]]
+    binding = "DB"
+    id = "your-kv-namespace-id"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+    [vars]
+    JWT_SECRET = "your-secret-key"
+    ```
 
-### Deployment
+4. **Deploy Cloudflare Workers**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    ```bash
+    wrangler publish
+    ```
 
-### `npm run build` fails to minify
+5. **Run the React app**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    ```bash
+    cd ..
+    npm start
+    ```
+
+## Usage
+
+### Login
+
+- Navigate to the login page.
+- Enter your username and password.
+- Click on the "Login" button.
+
+### Register
+
+- Click on "Register" on the login page.
+- Fill out the registration form.
+- Click on the "Register" button.
+
+### Dashboard
+
+- View the list of job applications.
+- Add a new job application by clicking "Add Job".
+- Quick add a job application by clicking "Quick Add" and providing a LinkedIn URL.
+- Edit an existing job application by clicking on a row.
+- Delete a job application by clicking the trash can icon.
+- View and edit profile details by hovering over the avatar and selecting "Profile".
+
+## API Endpoints
+
+### Cloudflare Worker Endpoints
+
+- **Login**: `/login` (POST)
+- **Register**: `/register` (POST)
+- **Get Applications**: `/applications` (GET)
+- **Add Application**: `/applications/add` (POST)
+- **Quick Add Application**: `/applications/quickadd` (POST)
+- **Edit Application**: `/applications/edit` (POST)
+- **Delete Application**: `/applications/delete` (POST)
+- **Get User Details**: `/user/details` (GET)
+- **Update User Details**: `/user/update` (POST)
+
+## Code Structure
+
+### Frontend (React)
+
+- `src/components/Dashboard.js`: Main dashboard component.
+- `src/components/Summary.js`: Summary component for toolbar.
+- `src/utils/api.js`: Axios instance configuration.
+- `src/utils/Helper.js`: Helper functions.
+- `src/index.js`: Entry point for the React app.
+- `public/index.html`: Main HTML file.
+- `src/App.js`: Main App component.
+
+### Backend (Cloudflare Workers)
+
+- `src/index.js`: Main worker script.
+- `src/utils/jwt.js`: JWT utility functions.
+- `src/utils/db.js`: Database interaction functions.
+
+## Contribution
+
+Feel free to fork this repository and contribute by submitting a pull request. Please make sure to follow the standard coding guidelines and include relevant tests for your changes.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
