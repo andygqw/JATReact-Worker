@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarDensitySelector } from '@mui/x-data-grid';
-import axios from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import axios from '../utils/api';
+
+import { DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import {
     Box, Typography, Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle,
     TextField, Select, FormControl, InputLabel, Checkbox, FormControlLabel,
-    Avatar, IconButton, Menu, MenuItem
+    Avatar, IconButton, Menu, MenuItem, useMediaQuery, useTheme
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DeleteIcon from '@mui/icons-material/Delete'
+
 import './Dashboard.css';
 import Summary from './Summary';
 import { getFormattedDate } from '../utils/Helper.js';
@@ -16,6 +18,7 @@ import { getFormattedDate } from '../utils/Helper.js';
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
 
 function Dashboard() {
+
     const [applications, setApplications] = useState([]);
     const [open, setOpen] = useState(false);
     const [currentApplication, setCurrentApplication] = useState(null);
@@ -38,6 +41,10 @@ function Dashboard() {
     const [anchorEl, setAnchorEl] = useState(null);
     const navigate = useNavigate();
     const errorTimeoutRef = useRef(null);
+
+    // Themes and Mobile display
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -280,11 +287,11 @@ function Dashboard() {
     };
 
     const columns = [
-        { field: 'job_title', headerName: 'Job Title', flex: 0.2, sortable: true, filterable: true, editable: false },
-        { field: 'company_name', headerName: 'Company', flex: 0.2, sortable: true, filterable: true, editable: false },
-        { field: 'job_location', headerName: 'Location', flex: 0.2, sortable: true, filterable: true, editable: false },
-        { field: 'status', headerName: 'Status', flex: 0.1, sortable: true, filterable: true, editable: false },
-        { field: 'application_date', headerName: 'Applied Date', flex: 0.1, sortable: true, filterable: true, editable: false },
+        !isMobile && { field: 'job_title', headerName: 'Job Title', flex: 0.2, sortable: true, filterable: true, editable: false },
+        { field: 'company_name', headerName: 'Company', flex: isMobile ? 0.1 : 0.2, sortable: true, filterable: true, editable: false },
+        !isMobile && { field: 'job_location', headerName: 'Location', flex: 0.2, sortable: true, filterable: true, editable: false },
+        !isMobile && { field: 'status', headerName: 'Status', flex: 0.1, sortable: true, filterable: true, editable: false },
+        !isMobile && { field: 'application_date', headerName: 'Applied Date', flex: 0.1, sortable: true, filterable: true, editable: false },
         {
             field: 'job_url',
             headerName: 'Job Link',
@@ -318,7 +325,7 @@ function Dashboard() {
                 </IconButton>
             ),
         },
-    ];
+    ].filter(Boolean);
 
     function CustomToolbar() {
         return (
