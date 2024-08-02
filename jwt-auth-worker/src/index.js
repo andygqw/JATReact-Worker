@@ -1,13 +1,6 @@
 import { parseHTML } from 'linkedom';
 import bcrypt from 'bcryptjs';
-import { Numbers } from '@mui/icons-material';
 
-// Constants
-const DATABASE_USER = 'users';
-const DATABASE_JOBS = 'job_applications';
-const USERNAME = 'username';
-const USER_ID = 'user_id';
-const PASSWORD = 'password';
 
 // Utility Functions
 function base64urlEncode(str) {
