@@ -545,7 +545,7 @@ function Dashboard() {
                                     onChange={(e) => setCurrentApplication((prevApplication) => ({ ...prevApplication, is_marked: Number(e.target.checked) }))}
                                 />
                             }
-                            label="Is Marked"
+                            label="Highlight"
                         />
                     </DialogContent>
                     <DialogActions>
