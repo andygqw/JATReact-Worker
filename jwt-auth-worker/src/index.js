@@ -1,7 +1,30 @@
 import { parseHTML } from 'linkedom';
 import bcrypt from 'bcryptjs';
 
+function getTimeZoneDateTime(){
 
+  // Define the time zone
+  const timeZone = 'America/Los_Angeles'; // Change this to your desired time zone
+
+  // Get the current date and time in the specified time zone
+  const date = new Date();
+  const options = {
+    timeZone: timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false, // Use 24-hour time
+  };
+
+  // Format the date and time
+  const dateTimeFormat = new Intl.DateTimeFormat('en-US', options);
+  const [{ value: month },,{ value: day },,{ value: year },,{ value: hour },,{ value: minute },,{ value: second }] = dateTimeFormat.formatToParts(date);
+
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
 // Utility Functions
 function base64urlEncode(str) {
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
@@ -87,6 +110,13 @@ async function insertJobApplication(db, applicationData) {
     db.prepare(sql),
   ]);
   return rows[1].results[0].id;
+}
+
+async function log(db, operation, user_id, notes){
+
+  const time = getTimeZoneDateTime();
+  const sql = 'INSERT INTO log (operation, date, user_id, notes) VALUES (?, ?, ?, ?)';
+  await db.prepare(sql).bind(operation, time, user_id, notes).run();
 }
 
 async function handleLogin(request, db, JWT_SECRET) {
@@ -266,7 +296,9 @@ async function handleRegister(request, db) {
   const insertConfigQuery = 'INSERT INTO config (user_id, create_time, quickAddResumeVersion) VALUES (?, ?, ?)';
   const rows = await db.batch([db.prepare(insertUserQuery).bind(username, hashedPassword), db.prepare(getLastInsertIdQuery)]);
   if (!rows[0].success) throw new Error('Registration failed');
-  await db.prepare(insertConfigQuery).bind(rows[1].results[0].id, create_time, '').run();
+  const id = rows[1].results[0].id;
+  await log(db, "Register", id, "Registered Successfully");
+  await db.prepare(insertConfigQuery).bind(id, create_time, '').run();
   return addCorsHeaders(new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } }));
 }
 
