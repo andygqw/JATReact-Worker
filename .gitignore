@@ -1,5 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+/jwt-auth-worker/src
+
 # dependencies
 /node_modules
 /jwt-auth-worker/node_modules/
