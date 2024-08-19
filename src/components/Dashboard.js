@@ -286,6 +286,10 @@ function Dashboard() {
         setAnchorEl(null);
     };
 
+    const redirectToExternalSite = () => {
+        window.location.href = "https://tool.tiny-pink.com";
+    };
+
     const columns = [
         !isMobile && { field: 'job_title', headerName: 'Job Title', flex: 0.2, sortable: true, filterable: true, editable: false },
         { field: 'company_name', headerName: 'Company', flex: isMobile ? 0.1 : 0.2, sortable: true, filterable: true, editable: false },
@@ -359,6 +363,7 @@ function Dashboard() {
                         </IconButton>
                         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                             <MenuItem onClick={handleUserDetailsOpen}>Profile</MenuItem>
+                            <MenuItem onClick={redirectToExternalSite}>Go to GWTool</MenuItem>
                             <MenuItem onClick={handleLogout}>Logout</MenuItem>
                         </Menu>
                     </Box>
