@@ -17,7 +17,7 @@ import { getFormattedDate } from '../utils/Helper.js';
 
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
 
-function Dashboard() {
+const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
 
     const [applications, setApplications] = useState([]);
     const [open, setOpen] = useState(false);
@@ -50,10 +50,12 @@ function Dashboard() {
         const fetchApplications = async () => {
             setLoading(true);
             try {
+                if (!isLoggedIn) navigate('/login');
                 const response = await axios.get('/applications');
                 setApplications(response.data.results);
             } catch (error) {
                 setError(error.message);
+                setIsLoggedIn(false);
                 navigate('/login');
             } finally {
                 setLoading(false);
@@ -61,7 +63,7 @@ function Dashboard() {
         };
 
         fetchApplications();
-    }, [navigate]);
+    }, [navigate, isLoggedIn, setIsLoggedIn]);
 
     useEffect(() => {
         if (error) {
@@ -363,7 +365,7 @@ function Dashboard() {
                         </IconButton>
                         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                             <MenuItem onClick={handleUserDetailsOpen}>Profile</MenuItem>
-                            <MenuItem onClick={redirectToExternalSite}>Go to GWTool</MenuItem>
+                            <MenuItem onClick={redirectToExternalSite}>GWTool</MenuItem>
                             <MenuItem onClick={handleLogout}>Logout</MenuItem>
                         </Menu>
                     </Box>

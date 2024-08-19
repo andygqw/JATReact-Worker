@@ -4,7 +4,7 @@ import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Gri
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from '../utils/api';
 
-function Login() {
+function Login({ setIsLoggedIn }) {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -25,6 +25,7 @@ function Login() {
             );
             if (response.status === 200){
                 localStorage.setItem('token', response.data.token);
+                setIsLoggedIn(true);
                 navigate('/dashboard');
             }
             else {
