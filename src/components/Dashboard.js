@@ -56,7 +56,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
                     }
                 });
                 console.log(response);
-                if (response.ok) {
+                if (response.status === 200) {
                     console.log("In ok");
                     setApplications(response.data.results);
                     setIsLoggedIn(true);
@@ -95,10 +95,9 @@ const Dashboard = ({ setIsLoggedIn }) => {
                     }
                 });
                 console.log(JSON.stringify(response));
-                if(response.ok) {
+                if(response.status === 200) {
                     setUserDetails(response.data);
                 } else {
-                    console.log("In else user details");
                     throw new Error(response.data.error);
                 }
             } catch (error) {
