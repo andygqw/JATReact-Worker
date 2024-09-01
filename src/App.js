@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 
 function App() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <Router>
@@ -15,7 +15,7 @@ function App() {
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/" element={<Dashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>} />
+          <Route path="/" element={<Dashboard setIsLoggedIn={setIsLoggedIn}/>} />
         </Routes>
       </div>
     </Router>

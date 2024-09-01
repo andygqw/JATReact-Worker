@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Grid, Paper, Alert } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import axios from '../utils/api';
+import { AUTH_CENTER } from '../utils/Helper';
 
 function Login({ setIsLoggedIn }) {
 
@@ -16,15 +16,17 @@ function Login({ setIsLoggedIn }) {
         e.preventDefault();
         try {
 
-            const response = await axios.post('/login', { username, password },
-                {
-                    validateStatus: function (status) {
-                        return status >= 200 && status <= 500;
-                    }
-                }
-            );
+            const response = await fetch(AUTH_CENTER + '/login', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+
             if (response.status === 200){
-                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('username', username);
                 setIsLoggedIn(true);
                 navigate('/dashboard');
             }

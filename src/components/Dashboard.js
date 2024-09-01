@@ -17,7 +17,7 @@ import { getFormattedDate } from '../utils/Helper.js';
 
 const STATUS_OPTIONS = ['Applied', 'Viewed', 'Rejected', 'Gave up', 'Interviewing', 'Expired', 'Saved'];
 
-const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
+const Dashboard = ({ setIsLoggedIn }) => {
 
     const [applications, setApplications] = useState([]);
     const [open, setOpen] = useState(false);
@@ -50,9 +50,18 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
         const fetchApplications = async () => {
             setLoading(true);
             try {
-                if (!isLoggedIn) navigate('/login');
-                const response = await axios.get('/applications');
-                setApplications(response.data.results);
+                const response = await axios.get('/applications', {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
+                    }
+                });
+                if (response.ok) {
+                    setApplications(response.data.results);
+                    setIsLoggedIn(true);
+                    setError(null);
+                } else {
+                    throw new Error(response.data.error);
+                }
             } catch (error) {
                 setError(error.message);
                 setIsLoggedIn(false);
@@ -63,7 +72,7 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
         };
 
         fetchApplications();
-    }, [navigate, isLoggedIn, setIsLoggedIn]);
+    }, [navigate, setIsLoggedIn]);
 
     useEffect(() => {
         if (error) {
@@ -78,8 +87,16 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const response = await axios.get('/user/details');
-                setUserDetails(response.data);
+                const response = await axios.get('/user/details', {
+                    validateStatus: function (status) {
+                        return status >= 200 && status <= 500;
+                    }
+                });
+                if(response.ok) {
+                    setUserDetails(response.data);
+                } else {
+                    throw new Error(response.data.error);
+                }
             } catch (error) {
                 setError(error.message);
             }
@@ -145,6 +162,10 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
                         )
                     );
                     setDataGridKey((prevKey) => prevKey + 1);
+                } if (response.status === 401) {
+                    setError(error.message);
+                    setIsLoggedIn(false);
+                    navigate('/login');
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -157,6 +178,10 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
                 if (response.status === 200) {
                     const newApplication = { ...currentApplication, id: response.data.id };
                     setApplications((prevApplications) => [newApplication, ...prevApplications]);
+                } else if (response.status === 401) {
+                    setError(error.message);
+                    setIsLoggedIn(false);
+                    navigate('/login');
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -199,7 +224,12 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
             if (response.status === 200) {
                 const newApplication = { ...response.data.application };
                 setApplications((prevApplications) => [newApplication, ...prevApplications]);
-            } else {
+            } else if (response.status === 401) {
+                setError(error.message);
+                setIsLoggedIn(false);
+                navigate('/login');
+            } 
+            else {
                 throw new Error(response.data.error);
             }
         } catch (error) {
@@ -230,6 +260,10 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
             });
             if (response.status === 200) {
                 setApplications((prevApplications) => prevApplications.filter((app) => app.id !== applicationToDelete));
+            } else if (response.status === 401) {
+                setError(error.message);
+                setIsLoggedIn(false);
+                navigate('/login');
             } else {
                 throw new Error(response.data.error);
             }
@@ -243,7 +277,8 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        setError(null);
+        setIsLoggedIn(false);
         navigate('/login');
     };
 
@@ -269,7 +304,11 @@ const Dashboard = ({ isLoggedIn, setIsLoggedIn }) => {
                     return status >= 200 && status <= 500;
                 }
             });
-            if (response.status !== 200) {
+            if (response.status === 401) {
+                setError(error.message);
+                setIsLoggedIn(false);
+                navigate('/login');
+            } else if (response.status !== 200) {
                 throw new Error(response.data.error);
             }
             handleUserDetailsClose();

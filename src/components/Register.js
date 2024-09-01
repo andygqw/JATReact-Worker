@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Container, CssBaseline, Avatar, Paper, Alert, Grid } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import axios from '../utils/api';
-
-import { getFormattedDate } from '../utils/Helper.js';
+import { EMAIL_PATTERN, AUTH_CENTER } from '../utils/Helper';
 
 function Register() {
 
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -20,15 +19,21 @@ function Register() {
             setError('Passwords do not match');
             return;
         }
-        try {
 
-            const create_time = getFormattedDate();
-            const response = await axios.post('/register',
-                { username, password, create_time },
-                {validateStatus: function (status) {
-                    return status >= 200 && status <= 500;
-                }
+        if (!EMAIL_PATTERN.test(email)) {
+            throw new Error("An valid email is required");
+        }
+
+        try {
+            const response = await fetch(AUTH_CENTER + '/register', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({username, password, email})
             });
+
             if (response.status === 200) {
 
                 navigate('/login');
@@ -71,6 +76,18 @@ function Register() {
                             autoFocus
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="email"
+                            label="email"
+                            type="email"
+                            id="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <TextField
                             margin="normal"

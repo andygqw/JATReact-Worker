@@ -7,8 +7,3 @@ node_compat=true
 binding = "DB"
 database_name = "jobapplications"
 database_id = "b934078c-4701-4273-88e2-fb8bb37f0ebb"
-
-[[d1_databases]]
-binding = "UDB"
-database_name = "global_user"
-database_id = "ee1b3147-813e-4d53-a0fb-f4adfb6f3441"
