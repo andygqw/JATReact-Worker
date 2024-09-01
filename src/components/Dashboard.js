@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/api';
 
@@ -281,6 +282,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
 
     const handleLogout = () => {
         setError(null);
+        Cookies.remove('token', { path: '/', domain: '.tiny-pink.com' });
         setIsLoggedIn(false);
         navigate('/login');
     };
