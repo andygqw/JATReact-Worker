@@ -55,6 +55,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
                         return status >= 200 && status <= 500;
                     }
                 });
+                console.log(response);
                 if (response.ok) {
                     setApplications(response.data.results);
                     setIsLoggedIn(true);
@@ -92,6 +93,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
                         return status >= 200 && status <= 500;
                     }
                 });
+                console.log(JSON.stringify(response));
                 if(response.ok) {
                     setUserDetails(response.data);
                 } else {
