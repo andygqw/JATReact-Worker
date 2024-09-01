@@ -4,9 +4,11 @@ A modern job application tracking app built with React, MUI, and Cloudflare Work
 
 ## Features
 
-- **User Authentication**: Login and registration using JWT.
+- **SSO Implementation**: Seamlessly login with multiple services.
+- **User Authentication**: Login and registration using JWT within Cookie.
 - **Job Application Management**: Add, edit, and delete job applications.
 - **Quick Add**: Quickly add job applications from LinkedIn URLs.
+- **Generative AI**: Quickly add job applications by generative AI analyzing job information.
 - **Responsive UI**: Modern UI/UX with dark/light mode support.
 - **Summary Toolbar**: Brief summary of job applications.
 - **Profile Management**: Edit user details and settings.
@@ -15,8 +17,8 @@ A modern job application tracking app built with React, MUI, and Cloudflare Work
 ## Tech Stack
 
 - **Frontend**: React, MUI (Material-UI)
-- **Backend**: Cloudflare Workers, Node.js
-- **Authentication**: JWT (JSON Web Tokens)
+- **Backend**: Cloudflare Workers, Node.js, Llama
+- **Authentication**: JWT (Cookie)
 
 ## Access Online
 
@@ -85,8 +87,6 @@ A modern job application tracking app built with React, MUI, and Cloudflare Work
     binding = "DB"
     id = "your-kv-namespace-id"
 
-    [vars]
-    JWT_SECRET = "your-secret-key"
     ```
 
 4. **Deploy Cloudflare Workers**:
@@ -104,58 +104,15 @@ A modern job application tracking app built with React, MUI, and Cloudflare Work
 
 ## Usage
 
-### Login
-
-- Navigate to the login page.
-- Enter your username and password.
-- Click on the "Login" button.
-
-### Register
-
-- Click on "Register" on the login page.
-- Fill out the registration form.
-- Click on the "Register" button.
-
 ### Dashboard
 
 - View the list of job applications.
 - Add a new job application by clicking "Add Job".
 - Quick add a job application by clicking "Quick Add" and providing a LinkedIn URL.
+- AI add a job application by clicking "AI Add" and providing a link.
 - Edit an existing job application by clicking on a row.
 - Delete a job application by clicking the trash can icon.
 - View and edit profile details by hovering over the avatar and selecting "Profile".
-
-## API Endpoints
-
-### Cloudflare Worker Endpoints
-
-- **Login**: `/login` (POST)
-- **Register**: `/register` (POST)
-- **Get Applications**: `/applications` (GET)
-- **Add Application**: `/applications/add` (POST)
-- **Quick Add Application**: `/applications/quickadd` (POST)
-- **Edit Application**: `/applications/edit` (POST)
-- **Delete Application**: `/applications/delete` (POST)
-- **Get User Details**: `/user/details` (GET)
-- **Update User Details**: `/user/update` (POST)
-
-## Code Structure
-
-### Frontend (React)
-
-- `src/components/Dashboard.js`: Main dashboard component.
-- `src/components/Summary.js`: Summary component for toolbar.
-- `src/utils/api.js`: Axios instance configuration.
-- `src/utils/Helper.js`: Helper functions.
-- `src/index.js`: Entry point for the React app.
-- `public/index.html`: Main HTML file.
-- `src/App.js`: Main App component.
-
-### Backend (Cloudflare Workers)
-
-- `src/index.js`: Main worker script.
-- `src/utils/jwt.js`: JWT utility functions.
-- `src/utils/db.js`: Database interaction functions.
 
 ## Contribution
 
