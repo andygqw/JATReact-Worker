@@ -27,7 +27,7 @@ A modern job application tracking app built with React, MUI, and Cloudflare Work
 - Need to register
 
 ### Step
-1. go to [Dev Deploy Site](https://jatreact-worker.pages.dev)
+1. go to [Production Site](https://jat.tiny-pink.com)
 
 ## Installation on local
 
@@ -120,4 +120,4 @@ Feel free to fork this repository and contribute by submitting a pull request. P
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License.
